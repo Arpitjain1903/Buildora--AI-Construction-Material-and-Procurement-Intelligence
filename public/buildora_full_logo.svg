@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 460 170" width="460" height="170">
+  <style>
+    .brand-title { font-family: 'IBM Plex Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; font-weight: 700; font-size: 26px; fill: #1B263B; letter-spacing: 2px; text-anchor: middle; }
+    .brand-tagline1 { font-family: 'IBM Plex Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; font-weight: 600; font-size: 11.5px; fill: #778DA9; letter-spacing: 2.2px; text-anchor: middle; }
+    .brand-tagline2 { font-family: 'IBM Plex Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; font-weight: 500; font-size: 13.5px; fill: #415A77; letter-spacing: 0.3px; text-anchor: middle; }
+    .brand-line { stroke: #D0D5DD; stroke-width: 1; }
+    .brand-cube { fill: none; stroke: #6E5A44; stroke-width: 2.6; stroke-linecap: round; stroke-linejoin: round; }
+  </style>
+  <g transform="translate(210, 6)">
+    <rect class="brand-cube" x="21" y="5" width="11" height="10" rx="2.5" />
+    <rect class="brand-cube" x="8" y="16" width="11" height="10" rx="2.5" />
+    <rect class="brand-cube" x="8" y="27" width="11" height="10" rx="2.5" />
+    <rect class="brand-cube" x="20" y="27" width="11" height="10" rx="2.5" />
+  </g>
+  <text x="230" y="76" class="brand-title">BUILDORA AI</text>
+  <text x="230" y="100" class="brand-tagline1">INTELLIGENCE FOR SMARTER CONSTRUCTION</text>
+  <line x1="30" y1="118" x2="430" y2="118" class="brand-line" />
+  <text x="230" y="145" class="brand-tagline2">AI-Powered Material &amp; Procurement Intelligence</text>
+</svg>

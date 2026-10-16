@@ -1,0 +1,31 @@
+# Environment variables
+.env
+*.env.local
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+.venv/
+.pytest_cache/
+
+# Node
+node_modules/
+npm-debug.log*
+
+# Database / Local storage
+data/construction.db
+data/construction.db-journal
+
+# IDE & OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+.gemini/
+.code-review-graph/
+

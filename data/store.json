@@ -1,0 +1,169 @@
+{
+  "projects": [
+    {
+      "id": "proj_sharma_001",
+      "name": "Sharma Residence",
+      "city": "Delhi",
+      "type": "Low-rise residential",
+      "areaSqFt": 2000,
+      "stage": "Foundation and structure",
+      "targetDate": "2027-01-31",
+      "currency": "INR"
+    }
+  ],
+  "boqLines": [
+    {
+      "id": "boq_001",
+      "projectId": "proj_sharma_001",
+      "materialId": "cement_opc53",
+      "materialName": "Cement",
+      "specification": "OPC 53, 50 kg bag",
+      "unit": "bag",
+      "quantity": 100,
+      "rate": 410,
+      "daysUntilRequired": 5
+    },
+    {
+      "id": "boq_002",
+      "projectId": "proj_sharma_001",
+      "materialId": "steel_tmt_fe500",
+      "materialName": "TMT Steel",
+      "specification": "Fe500, 12 mm mixed",
+      "unit": "kg",
+      "quantity": 2500,
+      "rate": 67,
+      "daysUntilRequired": 10
+    },
+    {
+      "id": "boq_003",
+      "projectId": "proj_sharma_001",
+      "materialId": "aac_block_6in",
+      "materialName": "AAC Blocks",
+      "specification": "6 inch, 600x200 mm",
+      "unit": "piece",
+      "quantity": 10000,
+      "rate": 58,
+      "daysUntilRequired": 25
+    }
+  ],
+  "quotes": [
+    {
+      "id": "q_001",
+      "projectId": "proj_sharma_001",
+      "materialId": "cement_opc53",
+      "supplierId": "sup_alpha",
+      "supplierName": "Alpha Building Supplies",
+      "quantity": 100,
+      "unitPrice": 405,
+      "taxRate": 18,
+      "freight": 1200,
+      "handling": 0,
+      "discount": 500,
+      "leadTimeDays": 3,
+      "quoteDate": "2026-09-18"
+    },
+    {
+      "id": "q_002",
+      "projectId": "proj_sharma_001",
+      "materialId": "cement_opc53",
+      "supplierId": "sup_beta",
+      "supplierName": "Beta Cement Traders",
+      "quantity": 100,
+      "unitPrice": 398,
+      "taxRate": 18,
+      "freight": 2500,
+      "handling": 0,
+      "discount": 0,
+      "leadTimeDays": 6,
+      "quoteDate": "2026-09-18"
+    },
+    {
+      "id": "q_003",
+      "projectId": "proj_sharma_001",
+      "materialId": "steel_tmt_fe500",
+      "supplierId": "sup_alpha",
+      "supplierName": "Alpha Building Supplies",
+      "quantity": 2500,
+      "unitPrice": 66.2,
+      "taxRate": 18,
+      "freight": 4500,
+      "handling": 0,
+      "discount": 3000,
+      "leadTimeDays": 5,
+      "quoteDate": "2026-09-18"
+    },
+    {
+      "id": "q_004",
+      "projectId": "proj_sharma_001",
+      "materialId": "steel_tmt_fe500",
+      "supplierId": "sup_gamma",
+      "supplierName": "Gamma Steel House",
+      "quantity": 2500,
+      "unitPrice": 65.5,
+      "taxRate": 18,
+      "freight": 7000,
+      "handling": 0,
+      "discount": 0,
+      "leadTimeDays": 9,
+      "quoteDate": "2026-09-18"
+    },
+    {
+      "id": "q_005",
+      "projectId": "proj_sharma_001",
+      "materialId": "aac_block_6in",
+      "supplierId": "sup_delta",
+      "supplierName": "Delta Blocks",
+      "quantity": 10000,
+      "unitPrice": 55,
+      "taxRate": 18,
+      "freight": 8500,
+      "handling": 0,
+      "discount": 2500,
+      "leadTimeDays": 8,
+      "quoteDate": "2026-09-18"
+    },
+    {
+      "id": "q_006",
+      "projectId": "proj_sharma_001",
+      "materialId": "aac_block_6in",
+      "supplierId": "sup_beta",
+      "supplierName": "Beta Cement Traders",
+      "quantity": 10000,
+      "unitPrice": 54.5,
+      "taxRate": 18,
+      "freight": 15000,
+      "handling": 0,
+      "discount": 0,
+      "leadTimeDays": 5,
+      "quoteDate": "2026-09-18"
+    }
+  ],
+  "stock": [
+    {
+      "projectId": "proj_sharma_001",
+      "materialId": "cement_opc53",
+      "quantity": 20
+    },
+    {
+      "projectId": "proj_sharma_001",
+      "materialId": "steel_tmt_fe500",
+      "quantity": 300
+    },
+    {
+      "projectId": "proj_sharma_001",
+      "materialId": "aac_block_6in",
+      "quantity": 0
+    }
+  ],
+  "openOrders": [
+    {
+      "projectId": "proj_sharma_001",
+      "materialId": "cement_opc53",
+      "quantity": 30,
+      "expectedDate": "2026-09-21"
+    }
+  ],
+  "receipts": [],
+  "approvals": [],
+  "auditEvents": []
+}

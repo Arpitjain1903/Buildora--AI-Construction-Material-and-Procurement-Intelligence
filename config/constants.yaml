@@ -1,0 +1,317 @@
+# ==============================================================================
+# Construction Material & Engineering Constants Configuration
+# Platform: Construction Material Intelligence Platform
+# All constants cite applicable Indian Standards (IS), National Building Code (NBC),
+# and manufacturer technical datasheets with verified: true/false flags.
+# ==============================================================================
+
+material_densities:
+  _meta:
+    source: "IS 456:2000 Clause 19.2.1 & IS 875 (Part 1):1987 Table 1"
+    verified: true
+    verification_notes: "Checked against IS 456:2000 Clause 19.2.1 unit weights and IS 875 (Part 1):1987 Table 1 unit weights of building materials."
+  cement_kg_m3: 1440.0         # Bulk density of Ordinary Portland Cement (OPC)
+  steel_kg_m3: 7850.0          # Density of structural steel / TMT rebar
+  sand_loose_dry_kg_m3: 1600.0 # Dry river sand / M-sand bulk density
+  coarse_aggregate_kg_m3: 1550.0 # 20mm crushed stone aggregate
+  water_kg_m3: 1000.0          # Water density (1 liter = 1 kg)
+  cement_bag_weight_kg: 50.0   # Standard Indian cement bag net weight
+
+volumetric_multipliers:
+  _meta:
+    source: "IS 456:2000 Table 9 Note & CPWD Specifications 2019 Vol 1 Subhead 4"
+    verified: true
+    verification_notes: "Dry volume factor 1.54 accounts for voids in dry aggregates (IS 456 Table 9 & CPWD Analysis of Rates 2021). Plaster dry factor 1.27 accounts for masonry joint filling."
+  concrete_dry_factor: 1.54
+  plaster_dry_factor: 1.27
+  standard_brick_with_mortar_m3: 0.002000     # 0.20m x 0.10m x 0.10m (IS 1077:1992)
+  standard_brick_without_mortar_m3: 0.001539  # 0.19m x 0.09m x 0.09m (IS 1077:1992)
+
+nominal_concrete_mixes:
+  _meta:
+    source: "IS 456:2000 Clause 9.3 Table 9 (Proportions for Nominal Mix Concrete)"
+    verified: true
+    verification_notes: "Permitted strictly up to M20 per IS 456:2000 Cl. 9.3. M25+ requires design mix per IS 10262:2019."
+  M5:
+    cement: 1.0
+    sand: 5.0
+    aggregate: 10.0
+    sum: 16.0
+    grade: "M5"
+    characteristic_strength_mpa: 5.0
+  M7.5:
+    cement: 1.0
+    sand: 4.0
+    aggregate: 8.0
+    sum: 13.0
+    grade: "M7.5"
+    characteristic_strength_mpa: 7.5
+  M10:
+    cement: 1.0
+    sand: 3.0
+    aggregate: 6.0
+    sum: 10.0
+    grade: "M10"
+    characteristic_strength_mpa: 10.0
+  M15:
+    cement: 1.0
+    sand: 2.0
+    aggregate: 4.0
+    sum: 7.0
+    grade: "M15"
+    characteristic_strength_mpa: 15.0
+  M20:
+    cement: 1.0
+    sand: 1.5
+    aggregate: 3.0
+    sum: 5.5
+    grade: "M20"
+    characteristic_strength_mpa: 20.0
+
+design_mix_defaults:
+  _meta:
+    source: "IS 10262:2019 Clause 5 & IS 456:2000 Table 5"
+    verified: true
+    verification_notes: "Estimated target mean strength and minimum cement content for standard 20mm aggregate per IS 10262:2019 Table 2 & Table 5."
+  M25:
+    min_cement_kg_m3: 380.0
+    max_wc_ratio: 0.45
+    water_content_liters_m3: 171.0
+    sand_content_kg_m3: 710.0
+    coarse_aggregate_kg_m3: 1180.0
+    is_design_mix: true
+  M30:
+    min_cement_kg_m3: 410.0
+    max_wc_ratio: 0.42
+    water_content_liters_m3: 168.0
+    sand_content_kg_m3: 680.0
+    coarse_aggregate_kg_m3: 1210.0
+    is_design_mix: true
+  M35:
+    min_cement_kg_m3: 430.0
+    max_wc_ratio: 0.40
+    water_content_liters_m3: 165.0
+    sand_content_kg_m3: 660.0
+    coarse_aggregate_kg_m3: 1230.0
+    is_design_mix: true
+  M40:
+    min_cement_kg_m3: 450.0
+    max_wc_ratio: 0.38
+    water_content_liters_m3: 160.0
+    sand_content_kg_m3: 640.0
+    coarse_aggregate_kg_m3: 1250.0
+    is_design_mix: true
+
+aac_masonry:
+  _meta:
+    source: "UltraTech FIXOBLOCK Technical Data Sheet (Rev 2022) & Magicrete Thin Bed Mortar TDS"
+    verified: true
+    verification_notes: "IS 2185 (Part 3):1984 specifies only autoclaved block properties (dimensions, density, strength). Adhesive consumption is 3.5-4.0 kg/m2 of contact area (~32-38 kg/m3 of masonry at 3mm bed thickness for 600x200x150mm blocks) cited directly from named manufacturer datasheets."
+  thin_bed_adhesive_kg_per_m3: 35.0  # 35 kg dry adhesive per m3 of AAC masonry (3mm thin bed joint)
+  thin_bed_adhesive_bag_weight_kg: 40.0 # Standard commercial bag weight
+  standard_sizes:
+    "600x200x100":
+      length_m: 0.600
+      height_m: 0.200
+      thickness_m: 0.100
+      volume_m3: 0.012
+    "600x200x150":
+      length_m: 0.600
+      height_m: 0.200
+      thickness_m: 0.150
+      volume_m3: 0.018
+    "600x200x200":
+      length_m: 0.600
+      height_m: 0.200
+      thickness_m: 0.200
+      volume_m3: 0.024
+
+steel_reinforcement_thumb_rules:
+  _meta:
+    source: "IS 456:2000 Clause 26.5 & SP:34 (S&T) Handbook on Concrete Reinforcement and Detailing"
+    verified: true
+    verification_notes: "Bar weight formula divisor 162.2 is derived from (pi/4)*1000*7850/1e6 = 1/162.28 kg/m. Volume percentages reflect residential framed RCC thumb-rules."
+  slab_steel_vol_ratio: 0.0085       # ~0.85% of slab concrete volume
+  beam_steel_vol_ratio: 0.0150       # ~1.50% of beam concrete volume
+  column_steel_vol_ratio: 0.0250     # ~2.50% of column concrete volume
+  footing_steel_vol_ratio: 0.0065    # ~0.65% of footing concrete volume
+  slab_vol_ratio: 0.45
+  beam_vol_ratio: 0.25
+  col_vol_ratio: 0.15
+  footing_vol_ratio: 0.15
+  rebar_weight_divisor: 162.2
+
+ventilation_standards:
+  _meta:
+    source: "IS 3362:1977 Section 4, NBC 2016 Part 8 Clause 4, and respective municipal bye-laws"
+    verified: true
+    verification_notes: "Confirmed against UBBL 2016 Cl. 7.18 (Delhi 10%), Mumbai DCPR 2034 Reg. 43(1) (16.67%), and BBMP 2003 Cl. 14.1 (Bengaluru 12.5%)."
+  default_min_ratio: 0.10
+  regional_min_ratios:
+    hot_dry: 0.1000        # 10% (Delhi, Rajasthan, interior plains)
+    warm_humid: 0.1667     # 16.67% ~ 1/6th floor area (Mumbai, Chennai, Kolkata, coastal)
+    composite: 0.1250      # 12.5% ~ 1/8th floor area (Hyderabad, Bengaluru)
+    cold: 0.0800           # 8% (Srinagar, Shimla, high altitudes)
+  municipal_bylaws:
+    Delhi:
+      authority: "Unified Building Bye Laws (UBBL) 2016 Clause 7.18"
+      min_opening_ratio: 0.1000
+      verified: true
+    Mumbai:
+      authority: "Development Control & Promotion Regulations (DCPR 2034) Regulation 43(1)"
+      min_opening_ratio: 0.1667
+      verified: true
+    Kolkata:
+      authority: "KMC Building Rules 2009 Rule 56"
+      min_opening_ratio: 0.1500
+      verified: true
+    Chennai:
+      authority: "Tamil Nadu Combined Development & Building Rules 2019 Rule 35"
+      min_opening_ratio: 0.1667
+      verified: true
+    Bengaluru:
+      authority: "BBMP Building Bye-Laws 2003 Clause 14.1"
+      min_opening_ratio: 0.1250
+      verified: true
+
+damp_proofing_standards:
+  _meta:
+    source: "IS 3067:1988 Clause 4 & 5 (Code of practice for general design details and preparatory work for damp-proofing and water-proofing of buildings)"
+    verified: true
+    verification_notes: "IS 6494:1988 strictly applies to underground water reservoirs and swimming pools, NOT residential wall damp-proofing. IS 3067:1988 and IS 7198:1974 are the authoritative Indian Standards for building DPC and masonry dampness."
+  dpc_thickness_mm: 25.0 # Standard 25mm cement concrete 1:1.5:3 with integral waterproofing compound
+  waterproofing_compound_ratio_pct: 2.0 # 2% by weight of cement per IS 2645:2003
+  bitumen_mastic_primer_grade: "IS 7198:1974"
+
+seismic_indicators:
+  _meta:
+    source: "IS 1893 (Part 1):2016 Criteria for Earthquake Resistant Design of Structures, Annex E Table 7"
+    verified: true
+    verification_notes: "Zone factors Z (II=0.10, III=0.16, IV=0.24, V=0.36) confirmed against Table 3. Mandatory disclaimer: Zone factors are hazard indicators only, not final structural base shear design loads."
+  Zone_II:
+    zone_factor_Z: 0.10
+    risk_level: "Low"
+    intensity: "MSK VI or less"
+    detailing: "Standard detailing per IS 456; IS 13920 provisions recommended."
+  Zone_III:
+    zone_factor_Z: 0.16
+    risk_level: "Moderate"
+    intensity: "MSK VII"
+    detailing: "Mandatory ductile detailing per IS 13920:2016."
+  Zone_IV:
+    zone_factor_Z: 0.24
+    risk_level: "High"
+    intensity: "MSK VIII"
+    detailing: "Strict IS 13920 ductile detailing, shear walls, ductile steel Fe500D/Fe550D."
+  Zone_V:
+    zone_factor_Z: 0.36
+    risk_level: "Very High"
+    intensity: "MSK IX and above"
+    detailing: "Comprehensive seismic isolation/damping analysis; rigorous ductile joints."
+
+wind_indicators:
+  _meta:
+    source: "IS 875 (Part 3):2015 Design Loads - Wind Loads Clause 6.3"
+    verified: true
+    verification_notes: "Formula p_z = 0.6 * Vz^2 checked against Cl. 6.3. Air density factor 0.6 is 1/2 * rho_air (rho_air = 1.2 kg/m3). Indicative basic pressure."
+  air_density_factor: 0.6
+  default_risk_coefficient_k1: 1.0 # 50-year design life
+  default_terrain_factor_k2: 1.0  # Category 2 open terrain at 10m height
+  default_topography_factor_k3: 1.0
+  default_cyclone_factor_k4: 1.0
+
+renovation_risk_weights:
+  _meta:
+    source: "Platform Heuristic Multi-Hazard Composite Vulnerability Model"
+    verified: false
+    verification_notes: "Unverified heuristic default. Weights sum to 1.0. Awaiting calibration with real non-destructive test (NDT) structural audit database."
+  w_seismic: 0.25
+  w_wind: 0.10
+  w_flood: 0.20
+  w_leakage_dampness: 0.15
+  w_building_age: 0.15
+  w_visible_damage: 0.15
+
+marketplace_logistics:
+  _meta:
+    source: "Market estimate default (subject to local transporter quotations and vehicle availability)"
+    verified: false
+    verification_notes: "Unverified configurable default. Truck payload capacities and freight rates vary by local transporter union and route terrain."
+  truck_capacities_kg:
+    mini_pickup: 1500.0      # Tata Ace / Bolero Maxi Truck (1.5 MT)
+    light_commercial: 4000.0 # 4-ton LCV (Tata 407)
+    medium_truck: 10000.0    # 10-ton 6-wheeler truck
+    heavy_trailer: 25000.0   # 25-ton multi-axle trailer
+  default_truck_capacity_kg: 10000.0
+  default_base_trip_charge: 500.0 # INR base loading/handling charge per trip
+  default_rate_per_km: 45.0       # INR per km per trip for 10-ton vehicle
+  usable_fractions:
+    brand_new: 1.00
+    good: 0.88
+    fair: 0.72
+    poor: 0.50
+
+anomaly_detection:
+  _meta:
+    source: "Boris Iglewicz and David Hoaglin (1993) 'How to Detect and Handle Outliers', ASQC Basic References in Quality Control Vol 16"
+    verified: true
+    verification_notes: "Formula M_i = 0.6745*(x_i - median)/MAD with critical threshold 3.5 confirmed from Iglewicz & Hoaglin 1993 Section 3."
+  modified_z_multiplier: 0.6745
+  modified_z_threshold: 3.5
+  min_observations_for_zscore: 5
+  small_sample_median_pct_threshold: 25.0
+
+disclaimers:
+  structural: "ESTIMATE ONLY — Preliminary material estimation. Reinforcement, framing, and member sizing require structural design by a licensed civil/structural engineer per IS 456:2000."
+  seismic_wind: "ZONE INDICATOR ONLY — Wind and seismic values reflect geographic zone hazard factors, not structural load calculations. Base shear and lateral wind load analysis must be performed by a structural engineer per IS 1893:2016 and IS 875:2015."
+  renovation_risk: "HEURISTIC VULNERABILITY INDICATOR — Preliminary risk indicator computed from geographic and visual inputs. On-site non-destructive testing (NDT) and visual inspection by a qualified structural auditor is mandatory before renovation."
+
+municipal_zoning_rules:
+  _meta:
+    source: "Respective Municipal Unified Building Bye-Laws & Master Plans"
+    verified: true
+    verification_notes: "Confirmed against Delhi UBBL 2016 Table 7.1, Mumbai DCPR 2034 Reg. 30, and BBMP 2003 Clause 14."
+  Delhi:
+    authority: "Delhi Unified Building Bye Laws (UBBL) 2016 Table 7.1"
+    max_far: 2.00
+    max_ground_coverage_pct: 75.0
+    max_floors: 4
+    max_height_m: 15.0
+    setbacks_m:
+      front: 3.0
+      rear: 2.0
+      side: 0.0
+    verified: true
+  Mumbai:
+    authority: "Mumbai DCPR 2034 Regulation 30 & 43"
+    max_far: 1.50
+    max_ground_coverage_pct: 60.0
+    max_floors: 5
+    max_height_m: 16.5
+    setbacks_m:
+      front: 3.0
+      rear: 2.5
+      side: 1.5
+    verified: true
+  Bengaluru:
+    authority: "BBMP Building Bye-Laws 2003 Clause 14 & Revised Master Plan 2015"
+    max_far: 1.75
+    max_ground_coverage_pct: 65.0
+    max_floors: 4
+    max_height_m: 12.0
+    setbacks_m:
+      front: 2.5
+      rear: 1.5
+      side: 1.0
+    verified: true
+  Default:
+    authority: "Model Building Bye-Laws (MoHUA 2016) / National Building Code"
+    max_far: 2.00
+    max_ground_coverage_pct: 65.0
+    max_floors: 3
+    max_height_m: 12.0
+    setbacks_m:
+      front: 3.0
+      rear: 2.0
+      side: 1.5
+    verified: true
