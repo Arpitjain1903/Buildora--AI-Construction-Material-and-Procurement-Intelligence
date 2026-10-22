@@ -41,6 +41,22 @@ class Settings:
     # Database connection string
     DATABASE_URL: str = os.getenv("DATABASE_URL", "")
 
+    # Authentication & Security
+    JWT_SECRET: str = os.getenv("JWT_SECRET", "buildora-development-secret-key-32-chars-long!")
+    JWT_ALGORITHM: str = os.getenv("JWT_ALGORITHM", "HS256")
+    JWT_EXPIRY_HOURS: int = int(os.getenv("JWT_EXPIRY_HOURS", "8"))
+    RESET_TOKEN_EXPIRY_MINUTES: int = int(os.getenv("RESET_TOKEN_EXPIRY_MINUTES", "20"))
+    RATE_LIMIT_PER_MINUTE: int = int(os.getenv("RATE_LIMIT_PER_MINUTE", "5"))
+
+    # SMTP Mail Settings
+    SMTP_HOST: Optional[str] = os.getenv("SMTP_HOST", None)
+    SMTP_PORT: int = int(os.getenv("SMTP_PORT", "587"))
+    SMTP_USER: Optional[str] = os.getenv("SMTP_USER", None)
+    SMTP_PASSWORD: Optional[str] = os.getenv("SMTP_PASSWORD", None)
+    SMTP_FROM: str = os.getenv("SMTP_FROM", "no-reply@buildora.ai")
+    SMTP_TLS: bool = os.getenv("SMTP_TLS", "true").lower() in ("true", "1", "yes")
+    APP_BASE_URL: str = os.getenv("APP_BASE_URL", "http://localhost:8000")
+
     # Backwards compatibility attributes
     @property
     def VISION_LLM_API_KEY(self) -> Optional[str]:

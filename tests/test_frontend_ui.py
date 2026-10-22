@@ -21,7 +21,7 @@ def test_frontend_index_html_served_at_root(client):
     res = client.get("/")
     assert res.status_code == 200
     html = res.text
-    assert "<title>Buildora AI" in html or "<title>ConstructIntel" in html or "<title>Datum" in html
+    assert "<title>Buildora" in html or "<title>Buildora AI" in html or "<title>ConstructIntel" in html or "<title>Datum" in html
     assert "Leaflet" in html or "leaflet.css" in html
     assert "OpenStreetMap" in html
 
@@ -176,7 +176,7 @@ def test_playwright_browser_wizard_flow():
         page.goto(file_url)
 
         # Check title and brand
-        assert "Buildora AI" in page.title() or "ConstructIntel" in page.title() or "Datum" in page.title()
+        assert "Buildora" in page.title() or "Buildora AI" in page.title() or "ConstructIntel" in page.title() or "Datum" in page.title()
 
         # Hide login modal to allow clicks
         page.evaluate("() => hideLogin()")

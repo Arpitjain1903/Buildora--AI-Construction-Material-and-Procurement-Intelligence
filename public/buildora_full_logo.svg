@@ -12,8 +12,8 @@
     <rect class="brand-cube" x="8" y="27" width="11" height="10" rx="2.5" />
     <rect class="brand-cube" x="20" y="27" width="11" height="10" rx="2.5" />
   </g>
-  <text x="230" y="76" class="brand-title">BUILDORA AI</text>
-  <text x="230" y="100" class="brand-tagline1">INTELLIGENCE FOR SMARTER CONSTRUCTION</text>
+  <text x="230" y="76" class="brand-title">BUILDORA</text>
+  <text x="230" y="100" class="brand-tagline1">CONSTRUCTION &amp; PROCUREMENT PLATFORM</text>
   <line x1="30" y1="118" x2="430" y2="118" class="brand-line" />
-  <text x="230" y="145" class="brand-tagline2">AI-Powered Material &amp; Procurement Intelligence</text>
+  <text x="230" y="145" class="brand-tagline2">Smart Material &amp; Procurement Platform</text>
 </svg>

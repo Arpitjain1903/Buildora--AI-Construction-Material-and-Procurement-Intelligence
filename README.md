@@ -1,12 +1,12 @@
-# Buildora AI — Intelligence for Smarter Construction
+# Buildora — Construction & Procurement Platform
 
-> **AI-Powered Material & Procurement Intelligence Platform for Construction, Engineering Take-Off, and Circular Sourcing.**
+> **Construction & Procurement Platform for Engineering Take-Off, Rate Comparison, and Circular Sourcing.**
 
 ---
 
 ## 🏗️ Overview
 
-**Buildora AI** is a full-stack engineering and procurement decision platform engineered specifically for residential contractors, design-build firms, and developers. It bridges site context, engineering standards (BIS/IS codes), material take-offs, multi-vendor delivered cost comparisons, circular material reuse, and multi-hazard renovation planning into a single unified system.
+**Buildora** is a full-stack engineering and procurement decision platform engineered specifically for residential contractors, design-build firms, and developers. It bridges site context, engineering standards (BIS/IS codes), material take-offs, multi-vendor delivered cost comparisons, circular material reuse, and multi-hazard renovation planning into a single unified system.
 
 ---
 

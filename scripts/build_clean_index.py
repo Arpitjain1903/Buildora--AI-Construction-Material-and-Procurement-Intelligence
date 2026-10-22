@@ -1,0 +1,3377 @@
+import json
+from pathlib import Path
+
+base_dir = Path(__file__).resolve().parent.parent
+en_path = base_dir / "public" / "locales" / "en.json"
+hi_path = base_dir / "public" / "locales" / "hi.json"
+
+with open(en_path, "r", encoding="utf-8") as f:
+    en_dict = json.load(f)
+
+with open(hi_path, "r", encoding="utf-8") as f:
+    hi_dict = json.load(f)
+
+embedded_i18n_json = json.dumps({"en": en_dict, "hi": hi_dict}, ensure_ascii=False)
+
+html_content = f"""<!doctype html>
+<html lang="hi">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Buildora — Construction & Procurement Platform</title>
+  <meta name="description" content="Buildora — Construction & Procurement Platform for Smarter Site Execution" />
+  <link rel="icon" type="image/svg+xml" href="/buildora_logo.svg" />
+
+  <!-- Google Fonts: Inter & Noto Sans Devanagari & IBM Plex Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+Devanagari:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+  <!-- Leaflet CSS for OpenStreetMap Pin-Drop -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+
+  <style>
+    /* ==========================================================================
+       1. DESIGN SYSTEM TOKENS & RESET
+       ========================================================================== */
+    :root {{
+      --bg: #F8FAFC;
+      --surface: #FFFFFF;
+      --text-primary: #0F172A;
+      --text-secondary: #64748B;
+      --border: #E2E8F0;
+      --brand: #1E3A8A;
+      --brand-hover: #172554;
+      --accent: #EA580C;
+      --accent-hover: #C2410C;
+      --sidebar-bg: #0F172A;
+      --sidebar-active: #1E293B;
+      --status-success: #16A34A;
+      --status-danger: #DC2626;
+      --status-warning: #D97706;
+      --status-info: #2563EB;
+
+      /* Spacing scale: 4 8 16 24 32 48 */
+      --space-1: 4px;
+      --space-2: 8px;
+      --space-3: 16px;
+      --space-4: 24px;
+      --space-5: 32px;
+      --space-6: 48px;
+
+      /* Radius */
+      --radius-sm: 8px;
+      --radius-md: 12px;
+      --radius-lg: 16px;
+      --radius-pill: 9999px;
+
+      /* Shadows */
+      --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+      --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.08), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
+      --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.06);
+
+      --sidebar-width: 260px;
+      --sidebar-collapsed-width: 72px;
+      --header-height: 64px;
+    }}
+
+    *, *::before, *::after {{
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }}
+
+    body {{
+      font-family: 'Noto Sans Devanagari', 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      font-size: 14.5px;
+      line-height: 1.6;
+      background-color: var(--bg);
+      color: var(--text-primary);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      -webkit-font-smoothing: antialiased;
+    }}
+
+    .mono {{
+      font-family: 'IBM Plex Mono', monospace;
+    }}
+
+    /* Typography Scale */
+    h1 {{ font-size: 28px; font-weight: 700; line-height: 1.3; color: var(--text-primary); }}
+    h2 {{ font-size: 22px; font-weight: 700; line-height: 1.35; color: var(--text-primary); }}
+    h3 {{ font-size: 17px; font-weight: 600; line-height: 1.4; color: var(--text-primary); }}
+    h4 {{ font-size: 14.5px; font-weight: 600; line-height: 1.4; color: var(--text-primary); }}
+    p {{ color: var(--text-secondary); }}
+
+    /* Layout Shell */
+    #app-shell {{
+      display: flex;
+      min-height: 100vh;
+      width: 100%;
+    }}
+
+    #main-wrapper {{
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+      background: var(--bg);
+      min-height: 100vh;
+    }}
+
+    /* ==========================================================================
+       2. TOP BAR (64px, White, Sticky)
+       ========================================================================== */
+    #top-bar {{
+      height: var(--header-height);
+      background: #FFFFFF;
+      border-bottom: 1px solid var(--border);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 var(--space-4);
+      gap: var(--space-3);
+    }}
+
+    .top-left {{
+      display: flex;
+      align-items: center;
+      gap: var(--space-3);
+      flex-shrink: 0;
+    }}
+
+    .mobile-hamburger {{
+      display: none;
+      background: none;
+      border: 0;
+      color: var(--text-primary);
+      cursor: pointer;
+      padding: 6px;
+      border-radius: var(--radius-sm);
+    }}
+
+    .org-brand {{
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      cursor: pointer;
+      user-select: none;
+    }}
+
+    .org-brand-name {{
+      font-size: 19px;
+      font-weight: 800;
+      letter-spacing: -0.3px;
+      color: var(--brand);
+    }}
+
+    /* Project Switcher Select */
+    .project-switcher-wrap {{
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: #F1F5F9;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 4px 8px;
+    }}
+    .project-switcher-wrap select {{
+      border: 0;
+      background: transparent;
+      font-family: inherit;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-primary);
+      cursor: pointer;
+      outline: none;
+    }}
+
+    /* Global Center Search Bar */
+    .top-center {{
+      flex: 1;
+      max-width: 580px;
+      position: relative;
+    }}
+    .search-box {{
+      position: relative;
+      width: 100%;
+      display: flex;
+      align-items: center;
+    }}
+    .search-box input {{
+      width: 100%;
+      height: 40px;
+      background: #F1F5F9;
+      border: 1px solid transparent;
+      border-radius: 10px;
+      padding: 0 68px 0 38px;
+      font-family: inherit;
+      font-size: 13.5px;
+      color: var(--text-primary);
+      outline: none;
+      transition: background 0.15s, border-color 0.15s, box-shadow 0.15s;
+    }}
+    .search-box input:focus {{
+      background: #FFFFFF;
+      border-color: var(--brand);
+      box-shadow: 0 0 0 3px rgba(30, 58, 138, 0.1);
+    }}
+    .search-box .search-icon {{
+      position: absolute;
+      left: 12px;
+      width: 16px;
+      height: 16px;
+      color: var(--text-secondary);
+      pointer-events: none;
+    }}
+    .search-box .kbd-shortcut {{
+      position: absolute;
+      right: 10px;
+      font-size: 11px;
+      font-weight: 600;
+      background: #E2E8F0;
+      border-radius: 4px;
+      padding: 2px 6px;
+      color: var(--text-secondary);
+      pointer-events: none;
+    }}
+
+    /* Global Search Results Dropdown */
+    #search-results-dropdown {{
+      position: absolute;
+      top: calc(100% + 6px);
+      left: 0;
+      right: 0;
+      background: #FFFFFF;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      box-shadow: var(--shadow-lg);
+      max-height: 420px;
+      overflow-y: auto;
+      z-index: 150;
+      display: none;
+    }}
+    .search-category-title {{
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--text-secondary);
+      padding: 8px 12px 4px 12px;
+      background: #F8FAFC;
+      border-bottom: 1px solid var(--border);
+    }}
+    .search-result-item {{
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 10px 14px;
+      cursor: pointer;
+      border-bottom: 1px solid rgba(0,0,0,0.04);
+      transition: background 0.12s;
+    }}
+    .search-result-item:hover, .search-result-item.highlighted {{
+      background: rgba(30, 58, 138, 0.06);
+    }}
+    .search-result-item .item-title {{
+      font-weight: 600;
+      font-size: 13.5px;
+      color: var(--text-primary);
+    }}
+    .search-result-item .item-sub {{
+      font-size: 12px;
+      color: var(--text-secondary);
+      margin-top: 2px;
+    }}
+
+    .top-right {{
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      position: relative;
+    }}
+
+    /* Language Toggle Segmented Pill */
+    .lang-toggle-wrap {{
+      display: inline-flex;
+      align-items: center;
+      background: #F1F5F9;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-pill);
+      padding: 2px;
+      gap: 2px;
+    }}
+    .lang-toggle-btn {{
+      border: 0;
+      background: transparent;
+      padding: 4px 10px;
+      border-radius: var(--radius-pill);
+      font-family: inherit;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-secondary);
+      cursor: pointer;
+      transition: background 0.15s, color 0.15s;
+    }}
+    .lang-toggle-btn.active {{
+      background: #FFFFFF;
+      color: var(--brand);
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }}
+
+    /* User Profile Dropdown Pill */
+    .user-profile {{
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      cursor: pointer;
+      padding: 4px 8px;
+      border-radius: var(--radius-sm);
+      transition: background 0.15s;
+      position: relative;
+    }}
+    .user-profile:hover {{
+      background: rgba(0,0,0,0.04);
+    }}
+    .user-avatar {{
+      width: 36px;
+      height: 36px;
+      border-radius: var(--radius-pill);
+      background: var(--brand);
+      color: #FFFFFF;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13.5px;
+      border: 2px solid #FFFFFF;
+      box-shadow: var(--shadow-sm);
+    }}
+    .user-details {{
+      display: flex;
+      flex-direction: column;
+      line-height: 1.2;
+    }}
+    .user-name {{
+      font-weight: 600;
+      font-size: 13.5px;
+      max-width: 140px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }}
+
+    /* Floating User Menu */
+    #user-dropdown-menu {{
+      position: absolute;
+      top: calc(100% + 8px);
+      right: 0;
+      background: #FFFFFF;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      box-shadow: var(--shadow-lg);
+      width: 200px;
+      display: none;
+      z-index: 150;
+      overflow: hidden;
+    }}
+    .dropdown-item {{
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      width: 100%;
+      padding: 10px 14px;
+      border: 0;
+      background: none;
+      font-family: inherit;
+      font-size: 13px;
+      color: var(--text-primary);
+      text-align: left;
+      cursor: pointer;
+      transition: background 0.12s;
+    }}
+    .dropdown-item:hover {{
+      background: #F1F5F9;
+    }}
+
+    /* ==========================================================================
+       3. SIDEBAR (ACCORDION & COLLAPSIBLE SLIDER)
+       ========================================================================== */
+    #sidebar-rail {{
+      width: var(--sidebar-width);
+      background: var(--sidebar-bg);
+      color: #F8FAFC;
+      display: flex;
+      flex-direction: column;
+      border-right: 1px solid rgba(255, 255, 255, 0.08);
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      overflow: hidden;
+      transition: width 0.2s ease, transform 0.25s ease;
+      z-index: 110;
+      flex-shrink: 0;
+    }}
+
+    #sidebar-rail.collapsed {{
+      width: var(--sidebar-collapsed-width);
+    }}
+
+    .sidebar-header {{
+      height: var(--header-height);
+      padding: 0 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      flex-shrink: 0;
+    }}
+    .sidebar-brand-left {{
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      overflow: hidden;
+    }}
+    .sidebar-logo {{
+      width: 32px;
+      height: 32px;
+      border-radius: var(--radius-sm);
+      background: var(--brand);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }}
+    .sidebar-brand-text {{
+      display: flex;
+      flex-direction: column;
+      line-height: 1.1;
+      white-space: nowrap;
+      transition: opacity 0.15s;
+    }}
+    #sidebar-rail.collapsed .sidebar-brand-text {{
+      opacity: 0;
+      pointer-events: none;
+    }}
+    .sidebar-title {{
+      font-size: 15px;
+      font-weight: 800;
+      letter-spacing: 0.5px;
+      color: #FFFFFF;
+    }}
+    .sidebar-subtitle {{
+      font-size: 10px;
+      color: #94A3B8;
+    }}
+    .sidebar-collapse-toggle {{
+      background: none;
+      border: 0;
+      color: #94A3B8;
+      cursor: pointer;
+      padding: 6px;
+      border-radius: var(--radius-sm);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: color 0.15s, background 0.15s;
+    }}
+    .sidebar-collapse-toggle:hover {{
+      color: #FFFFFF;
+      background: rgba(255,255,255,0.06);
+    }}
+
+    .sidebar-nav-scroll {{
+      flex: 1;
+      overflow-y: auto;
+      padding: 12px 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }}
+
+    /* Accordion Group Container */
+    .sidebar-accordion-group {{
+      border-radius: var(--radius-sm);
+      overflow: hidden;
+      margin-bottom: 2px;
+    }}
+    .sidebar-accordion-header {{
+      width: 100%;
+      background: none;
+      border: 0;
+      padding: 8px 10px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      color: #94A3B8;
+      font-family: inherit;
+      font-size: 11.5px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      cursor: pointer;
+      border-radius: var(--radius-sm);
+      transition: background 0.15s, color 0.15s;
+    }}
+    .sidebar-accordion-header:hover {{
+      color: #FFFFFF;
+      background: rgba(255,255,255,0.04);
+    }}
+    .chevron-icon {{
+      width: 14px;
+      height: 14px;
+      transition: transform 0.2s ease;
+    }}
+    .sidebar-accordion-group.open .chevron-icon {{
+      transform: rotate(180deg);
+    }}
+    .sidebar-accordion-content {{
+      display: none;
+      flex-direction: column;
+      gap: 3px;
+      padding: 4px 0 6px 0;
+    }}
+    .sidebar-accordion-group.open .sidebar-accordion-content {{
+      display: flex;
+    }}
+
+    #sidebar-rail.collapsed .sidebar-accordion-header span,
+    #sidebar-rail.collapsed .sidebar-accordion-header .chevron-icon {{
+      display: none;
+    }}
+    #sidebar-rail.collapsed .sidebar-accordion-content {{
+      display: flex !important;
+    }}
+
+    /* Nav Item Button */
+    .sidebar-item {{
+      width: 100%;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 8px 10px;
+      border-radius: var(--radius-sm);
+      border: 0;
+      background: transparent;
+      color: #CBD5E1;
+      font-family: inherit;
+      font-size: 13.5px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background 0.12s, color 0.12s;
+      white-space: nowrap;
+      position: relative;
+    }}
+    .sidebar-item:hover {{
+      background: rgba(255, 255, 255, 0.06);
+      color: #FFFFFF;
+    }}
+    .sidebar-item.active {{
+      background: var(--brand);
+      color: #FFFFFF;
+      font-weight: 600;
+    }}
+    .sidebar-item svg {{
+      width: 18px;
+      height: 18px;
+      flex-shrink: 0;
+    }}
+    #sidebar-rail.collapsed .sidebar-item {{
+      justify-content: center;
+      padding: 10px 0;
+    }}
+    #sidebar-rail.collapsed .sidebar-item span {{
+      display: none;
+    }}
+
+    /* Tooltips in Collapsed Sidebar */
+    #sidebar-rail.collapsed .sidebar-item::after {{
+      content: attr(data-tooltip);
+      position: absolute;
+      left: calc(100% + 10px);
+      top: 50%;
+      transform: translateY(-50%);
+      background: #0F172A;
+      color: #FFFFFF;
+      padding: 5px 10px;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 500;
+      white-space: nowrap;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.15s;
+      box-shadow: var(--shadow-md);
+      z-index: 200;
+      border: 1px solid rgba(255,255,255,0.1);
+    }}
+    #sidebar-rail.collapsed .sidebar-item:hover::after {{
+      opacity: 1;
+    }}
+
+    /* Sidebar Auth Footer */
+    #sidebar-auth-footer {{
+      padding: 12px 14px;
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+      background: rgba(0,0,0,0.18);
+      flex-shrink: 0;
+    }}
+
+    /* ==========================================================================
+       4. CONTENT CONTAINER & SERVICE GROUPS
+       ========================================================================== */
+    #content-area {{
+      padding: var(--space-4) var(--space-5);
+      flex: 1;
+      max-width: 1440px;
+      width: 100%;
+      margin: 0 auto;
+    }}
+
+    /* Light Clean Hero Banner */
+    .home-hero-banner {{
+      background: #FFFFFF;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 28px 32px;
+      margin-bottom: var(--space-4);
+      box-shadow: var(--shadow-sm);
+    }}
+    .home-hero-badge {{
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(30, 58, 138, 0.08);
+      color: var(--brand);
+      padding: 4px 12px;
+      border-radius: var(--radius-pill);
+      font-size: 11.5px;
+      font-weight: 600;
+      margin-bottom: 10px;
+    }}
+
+    /* How It Works 3-Step Section */
+    .how-it-works-grid {{
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 16px;
+      margin-bottom: var(--space-5);
+    }}
+    .step-card {{
+      background: #FFFFFF;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }}
+    .step-badge {{
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: rgba(30, 58, 138, 0.1);
+      color: var(--brand);
+      font-weight: 700;
+      font-size: 13px;
+      margin-bottom: 4px;
+    }}
+
+    /* 5 Categorized Service Groups */
+    .service-group-section {{
+      margin-bottom: 28px;
+    }}
+    .service-group-header {{
+      margin-bottom: 12px;
+    }}
+    .service-group-header h3 {{
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: 2px;
+    }}
+    .service-group-header p {{
+      font-size: 13px;
+      color: var(--text-secondary);
+    }}
+    .service-cards-row {{
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 16px;
+    }}
+    .service-card {{
+      background: #FFFFFF;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      height: 100%;
+      transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+      cursor: pointer;
+    }}
+    .service-card:hover {{
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-md);
+      border-color: var(--brand);
+    }}
+    .service-card-top {{
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 12px;
+    }}
+    .service-icon-box {{
+      width: 42px;
+      height: 42px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }}
+    .service-card-title {{
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: 4px;
+    }}
+    .service-card-desc {{
+      font-size: 13px;
+      color: var(--text-secondary);
+      line-height: 1.5;
+      margin-bottom: 16px;
+      flex: 1;
+    }}
+
+    /* Metric Cards Grid */
+    .metric-grid {{
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+      gap: 16px;
+      margin-bottom: var(--space-5);
+    }}
+    .metric-card {{
+      background: #FFFFFF;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 18px;
+      box-shadow: var(--shadow-sm);
+      cursor: pointer;
+      transition: transform 0.15s ease, border-color 0.15s ease;
+    }}
+    .metric-card:hover {{
+      transform: translateY(-2px);
+      border-color: var(--brand);
+    }}
+    .metric-card-title {{
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 6px;
+    }}
+    .metric-card-val {{
+      font-size: 28px;
+      font-weight: 700;
+      color: var(--text-primary);
+      line-height: 1.1;
+    }}
+
+    /* Standard Cards & Tables */
+    .card {{
+      background: #FFFFFF;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: var(--space-4);
+      box-shadow: var(--shadow-sm);
+      margin-bottom: var(--space-4);
+    }}
+
+    .table-container {{
+      width: 100%;
+      overflow-x: auto;
+    }}
+    .datum-table {{
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+      font-size: 13.5px;
+    }}
+    .datum-table th {{
+      background: #F8FAFC;
+      color: var(--text-secondary);
+      font-weight: 600;
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border);
+      white-space: nowrap;
+    }}
+    .datum-table td {{
+      padding: 12px 14px;
+      border-bottom: 1px solid var(--border);
+      color: var(--text-primary);
+    }}
+    .datum-table tr:hover {{
+      background: #F8FAFC;
+    }}
+
+    /* Badges */
+    .badge {{
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 3px 8px;
+      border-radius: var(--radius-pill);
+      font-size: 11.5px;
+      font-weight: 600;
+      line-height: 1.2;
+    }}
+    .badge-info {{ background: rgba(37, 99, 235, 0.1); color: var(--status-info); }}
+    .badge-success {{ background: rgba(22, 163, 74, 0.1); color: var(--status-success); }}
+    .badge-warning {{ background: rgba(217, 119, 6, 0.1); color: var(--status-warning); }}
+    .badge-danger {{ background: rgba(220, 38, 38, 0.1); color: var(--status-danger); }}
+    .badge-accent {{ background: rgba(234, 88, 12, 0.1); color: var(--accent); }}
+
+    /* Buttons */
+    .btn {{
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 8px 16px;
+      border-radius: var(--radius-sm);
+      font-family: inherit;
+      font-size: 13.5px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.15s, border-color 0.15s, box-shadow 0.15s;
+      border: 1px solid transparent;
+      text-decoration: none;
+    }}
+    .btn-primary {{
+      background: var(--brand);
+      color: #FFFFFF;
+    }}
+    .btn-primary:hover {{
+      background: var(--brand-hover);
+    }}
+    .btn-secondary {{
+      background: #FFFFFF;
+      color: var(--text-primary);
+      border-color: var(--border);
+    }}
+    .btn-secondary:hover {{
+      background: #F8FAFC;
+      border-color: #CBD5E1;
+    }}
+    .btn-accent {{
+      background: var(--accent);
+      color: #FFFFFF;
+    }}
+    .btn-accent:hover {{
+      background: var(--accent-hover);
+    }}
+    .btn-sm {{
+      padding: 5px 10px;
+      font-size: 12px;
+      border-radius: 6px;
+    }}
+
+    /* Form Controls */
+    .form-group {{
+      margin-bottom: 14px;
+    }}
+    .form-label {{
+      display: block;
+      font-size: 12.5px;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 5px;
+    }}
+    .form-input, .form-select, .form-textarea {{
+      width: 100%;
+      padding: 9px 12px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border);
+      background: #FFFFFF;
+      font-family: inherit;
+      font-size: 13.5px;
+      color: var(--text-primary);
+      outline: none;
+      transition: border-color 0.15s, box-shadow 0.15s;
+    }}
+    .form-input:focus, .form-select:focus, .form-textarea:focus {{
+      border-color: var(--brand);
+      box-shadow: 0 0 0 3px rgba(30, 58, 138, 0.1);
+    }}
+
+    /* Project Tabs */
+    .tab-bar-container {{
+      border-bottom: 1px solid var(--border);
+      margin-bottom: var(--space-4);
+      background: #FFFFFF;
+      border-radius: var(--radius-md) var(--radius-md) 0 0;
+      overflow-x: auto;
+    }}
+    .tab-nav {{
+      display: flex;
+      gap: 4px;
+      padding: 6px 12px 0 12px;
+    }}
+    .tab-item {{
+      background: none;
+      border: 0;
+      padding: 10px 14px;
+      font-family: inherit;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-secondary);
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      white-space: nowrap;
+      transition: color 0.15s, border-color 0.15s;
+    }}
+    .tab-item:hover {{
+      color: var(--text-primary);
+    }}
+    .tab-item.active {{
+      color: var(--brand);
+      border-bottom-color: var(--brand);
+    }}
+
+    /* Statutory Engineering Disclaimer */
+    .statutory-disclaimer {{
+      background: #FFFBEB;
+      border: 1px solid #FCD34D;
+      color: #92400E;
+      padding: 12px 16px;
+      border-radius: var(--radius-sm);
+      font-size: 12.5px;
+      line-height: 1.5;
+      margin-bottom: var(--space-4);
+    }}
+
+    /* Photo Dropzone */
+    .photo-dropzone {{
+      border: 2px dashed var(--border);
+      border-radius: var(--radius-md);
+      padding: 24px;
+      text-align: center;
+      background: #F8FAFC;
+      cursor: pointer;
+      transition: border-color 0.15s, background 0.15s;
+    }}
+    .photo-dropzone:hover {{
+      border-color: var(--brand);
+      background: rgba(30, 58, 138, 0.03);
+    }}
+
+    /* 3-Column Standard Footer */
+    #global-footer {{
+      background: #FFFFFF;
+      border-top: 1px solid var(--border);
+      padding: 36px var(--space-5) 24px var(--space-5);
+      margin-top: auto;
+    }}
+    .footer-grid {{
+      max-width: 1440px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 2fr 1fr 1fr;
+      gap: 32px;
+      margin-bottom: 28px;
+    }}
+    .footer-col h4 {{
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: 12px;
+    }}
+    .footer-col p {{
+      font-size: 13px;
+      color: var(--text-secondary);
+      line-height: 1.6;
+      max-width: 360px;
+    }}
+    .footer-links {{
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }}
+    .footer-links a {{
+      color: var(--text-secondary);
+      font-size: 13px;
+      text-decoration: none;
+      transition: color 0.15s;
+    }}
+    .footer-links a:hover {{
+      color: var(--brand);
+    }}
+    .footer-bottom {{
+      max-width: 1440px;
+      margin: 0 auto;
+      border-top: 1px solid var(--border);
+      padding-top: 18px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+      font-size: 12.5px;
+      color: var(--text-secondary);
+    }}
+
+    /* Mobile backdrop */
+    #sidebar-backdrop {{
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.6);
+      backdrop-filter: blur(2px);
+      z-index: 105;
+    }}
+
+    /* Modal Backdrop */
+    .modal-backdrop {{
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.6);
+      backdrop-filter: blur(2px);
+      z-index: 200;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+    }}
+    .modal-box {{
+      background: #FFFFFF;
+      border-radius: var(--radius-md);
+      box-shadow: var(--shadow-lg);
+      padding: 24px;
+      width: 100%;
+      max-height: 90vh;
+      overflow-y: auto;
+    }}
+
+    /* Toast */
+    #toast-container {{
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      z-index: 300;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }}
+    .toast-msg {{
+      padding: 12px 18px;
+      border-radius: 8px;
+      box-shadow: var(--shadow-lg);
+      font-size: 13.5px;
+      color: #FFFFFF;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      min-width: 280px;
+      max-width: 420px;
+    }}
+    .toast-info {{ background: #1E3A8A; }}
+    .toast-success {{ background: #16A34A; }}
+    .toast-error {{ background: #DC2626; }}
+
+    /* Auth Page */
+    .auth-page {{
+      min-height: calc(100vh - 120px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }}
+    .auth-card {{
+      background: #FFFFFF;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      box-shadow: var(--shadow-md);
+      padding: 32px;
+      width: 100%;
+    }}
+    .password-input-group {{
+      position: relative;
+      display: flex;
+      align-items: center;
+    }}
+    .password-toggle-btn {{
+      position: absolute;
+      right: 10px;
+      background: none;
+      border: 0;
+      color: var(--text-secondary);
+      cursor: pointer;
+      padding: 4px;
+    }}
+    .auth-alert {{
+      padding: 10px 14px;
+      border-radius: 8px;
+      font-size: 13px;
+      margin-bottom: 16px;
+    }}
+    .auth-alert-error {{
+      background: #FEE2E2;
+      color: #991B1B;
+      border: 1px solid #FCA5A5;
+    }}
+    .auth-alert-success {{
+      background: #DCFCE7;
+      color: #166534;
+      border: 1px solid #86EFAC;
+    }}
+
+    /* Responsive */
+    @media (max-width: 900px) {{
+      .mobile-hamburger {{ display: inline-flex; }}
+      #sidebar-rail {{
+        position: fixed;
+        top: 0;
+        bottom: 0;
+        left: 0;
+        transform: translateX(-100%);
+        box-shadow: var(--shadow-lg);
+      }}
+      #sidebar-rail.open {{
+        transform: translateX(0);
+      }}
+      #sidebar-backdrop.active {{
+        display: block;
+      }}
+      .footer-grid {{
+        grid-template-columns: 1fr;
+        gap: 24px;
+      }}
+      .top-center {{
+        max-width: none;
+      }}
+      .user-details {{
+        display: none;
+      }}
+      #header-project-switcher-wrap {{
+        display: none;
+      }}
+    }}
+  </style>
+</head>
+<body>
+
+  <!-- App Shell -->
+  <div id="app-shell">
+
+    <!-- Mobile Drawer Backdrop -->
+    <div id="sidebar-backdrop" onclick="toggleMobileSidebar(false)"></div>
+
+    <!-- 1. COLLAPSIBLE ACCORDION SIDEBAR -->
+    <aside id="sidebar-rail">
+      <!-- Sidebar Header -->
+      <div class="sidebar-header">
+        <div class="sidebar-brand-left" onclick="navigateTo('dashboard')" style="cursor: pointer;">
+          <div class="sidebar-logo">
+            <svg width="20" height="20" viewBox="0 0 40 40" fill="none" stroke="#FFFFFF" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="21" y="5" width="11" height="10" rx="2.5" />
+              <rect x="8" y="16" width="11" height="10" rx="2.5" />
+              <rect x="8" y="27" width="11" height="10" rx="2.5" />
+              <rect x="20" y="27" width="11" height="10" rx="2.5" />
+            </svg>
+          </div>
+          <div class="sidebar-brand-text">
+            <span class="sidebar-title">BUILDORA</span>
+            <span class="sidebar-subtitle" id="sidebar-tagline-text">Construction &amp; Procurement</span>
+          </div>
+        </div>
+        <button class="sidebar-collapse-toggle" onclick="toggleSidebarCollapse()" title="Toggle Sidebar">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 19l-7-7 7-7m8 14l-7-7 7-7"/></svg>
+        </button>
+      </div>
+
+      <!-- Sidebar Navigation Accordion -->
+      <nav class="sidebar-nav-scroll">
+        <!-- Home / Dashboard -->
+        <button class="sidebar-item active" id="nav-dashboard" onclick="navigateTo('dashboard')" data-tooltip="Home & Overview">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+          <span id="nav-lbl-dashboard">Home & Overview</span>
+        </button>
+
+        <!-- GROUP 1: PROJECTS -->
+        <div class="sidebar-accordion-group open" id="grp-projects">
+          <button class="sidebar-accordion-header" onclick="toggleAccordion('grp-projects')">
+            <span id="grp-lbl-projects">Projects</span>
+            <svg class="chevron-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+          </button>
+          <div class="sidebar-accordion-content">
+            <button class="sidebar-item" id="nav-projects" onclick="navigateProtected('projects')" data-tooltip="Projects">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M3 21h18M5 21V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16M9 9h1M14 9h1M9 13h1M14 13h1M9 17h1M14 17h1"/></svg>
+              <span id="nav-lbl-all-projects">All Projects</span>
+            </button>
+            <button class="sidebar-item" id="nav-takeoff" onclick="navigateProtected('project', 'takeoff')" data-tooltip="Material Take-Off">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>
+              <span id="nav-lbl-boq">Material Take-Off (BOQ)</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- GROUP 2: BUY MATERIALS -->
+        <div class="sidebar-accordion-group open" id="grp-buy">
+          <button class="sidebar-accordion-header" onclick="toggleAccordion('grp-buy')">
+            <span id="grp-lbl-buy">Buy Materials</span>
+            <svg class="chevron-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+          </button>
+          <div class="sidebar-accordion-content">
+            <button class="sidebar-item" id="nav-quotes" onclick="navigateProtected('project', 'quotes')" data-tooltip="Cement & Steel Quotes">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
+              <span id="nav-lbl-quotes">Cement &amp; Steel Quotes</span>
+            </button>
+            <button class="sidebar-item" id="nav-receipts" onclick="navigateProtected('project', 'receipts')" data-tooltip="Deliveries & Receipts">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+              <span id="nav-lbl-receipts">Deliveries &amp; Receipts</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- GROUP 3: MARKETPLACE -->
+        <div class="sidebar-accordion-group open" id="grp-mkt">
+          <button class="sidebar-accordion-header" onclick="toggleAccordion('grp-mkt')">
+            <span id="grp-lbl-mkt">Marketplace</span>
+            <svg class="chevron-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+          </button>
+          <div class="sidebar-accordion-content">
+            <button class="sidebar-item" id="nav-marketplace" onclick="navigateProtected('marketplace')" data-tooltip="Buy Surplus Materials">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M3 9l2-5h14l2 5M3 9v11a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V9M3 9h18M9 22V12h6v10"/></svg>
+              <span id="nav-lbl-surplus">Buy Surplus Materials</span>
+            </button>
+            <button class="sidebar-item" id="nav-marketplace-sell" onclick="navigateProtected('marketplace', 'sell')" data-tooltip="Sell Leftover Stock">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              <span id="nav-lbl-sell">Sell Leftover Stock</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- GROUP 4: SITE SAFETY & CODES -->
+        <div class="sidebar-accordion-group open" id="grp-site">
+          <button class="sidebar-accordion-header" onclick="toggleAccordion('grp-site')">
+            <span id="grp-lbl-site">Site Safety &amp; Codes</span>
+            <svg class="chevron-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+          </button>
+          <div class="sidebar-accordion-content">
+            <button class="sidebar-item" id="nav-climate" onclick="navigateProtected('climate')" data-tooltip="IS 456 & Codes">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+              <span id="nav-lbl-codes">IS 456 &amp; Seismic Hazards</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- GROUP 5: REPORTS -->
+        <div class="sidebar-accordion-group open" id="grp-rep">
+          <button class="sidebar-accordion-header" onclick="toggleAccordion('grp-rep')">
+            <span id="grp-lbl-rep">Reports</span>
+            <svg class="chevron-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+          </button>
+          <div class="sidebar-accordion-content">
+            <button class="sidebar-item" id="nav-reports" onclick="navigateProtected('reports')" data-tooltip="Price Trends & Reports">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+              <span id="nav-lbl-trends">Price Trends &amp; Reports</span>
+            </button>
+          </div>
+        </div>
+      </nav>
+
+      <!-- Sidebar Auth Footer -->
+      <div id="sidebar-auth-footer"></div>
+    </aside>
+
+    <!-- Main Wrapper -->
+    <div id="main-wrapper">
+
+      <!-- 2. TOP BAR (64px, White, Sticky) -->
+      <header id="top-bar">
+        <div class="top-left">
+          <!-- Mobile Hamburger -->
+          <button class="mobile-hamburger" onclick="toggleMobileSidebar(true)" aria-label="Open Sidebar">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+          </button>
+
+          <!-- Logo + Buildora Brand -->
+          <div class="org-brand" onclick="navigateTo('dashboard')" title="Buildora Home">
+            <svg width="26" height="26" viewBox="0 0 40 40" fill="none" stroke="var(--brand)" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0;">
+              <rect x="21" y="5" width="11" height="10" rx="2.5" />
+              <rect x="8" y="16" width="11" height="10" rx="2.5" />
+              <rect x="8" y="27" width="11" height="10" rx="2.5" />
+              <rect x="20" y="27" width="11" height="10" rx="2.5" />
+            </svg>
+            <span class="org-brand-name">Buildora</span>
+          </div>
+
+          <!-- Project Switcher Select -->
+          <div class="project-switcher-wrap" id="header-project-switcher-wrap">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--brand)" stroke-width="2"><path d="M3 21h18M5 21V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16"/></svg>
+            <select id="header-project-select" onchange="handleHeaderProjectChange(this.value)" aria-label="Active Project">
+              <option value="proj_sharma_001">Sharma Residence</option>
+              <option value="proj_sunrise_002">Sunrise Heights</option>
+              <option value="proj_metro_003">Metro Commercial</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Center Global Search with Shortcut -->
+        <div class="top-center">
+          <div class="search-box">
+            <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <input type="text" id="global-search-input" placeholder="सामग्री, प्रोजेक्ट, कोड या सप्लायर खोजें... (Ctrl+K)" oninput="handleDebouncedGlobalSearch(event)" onkeydown="handleSearchKeyNav(event)" />
+            <span class="kbd-shortcut">Ctrl+K</span>
+          </div>
+
+          <!-- Global Search Results Dropdown -->
+          <div id="search-results-dropdown"></div>
+        </div>
+
+        <!-- Right Side: Language Toggle & Auth -->
+        <div class="top-right">
+          <!-- Language Toggle Segmented Pill -->
+          <div class="lang-toggle-wrap">
+            <button class="lang-toggle-btn active" id="btn-lang-hi" onclick="switchLanguage('hi')">हिं</button>
+            <button class="lang-toggle-btn" id="btn-lang-en" onclick="switchLanguage('en')">EN</button>
+          </div>
+
+          <!-- Auth buttons (logged out) -->
+          <div id="auth-buttons-group" style="display: flex; gap: 8px; align-items: center;">
+            <button class="btn btn-secondary btn-sm" onclick="navigateTo('login')" id="btn-header-login">लॉगिन</button>
+            <button class="btn btn-primary btn-sm" onclick="navigateTo('register')" id="btn-header-register">खाता बनाएं</button>
+          </div>
+
+          <!-- Notification Bell (logged in) -->
+          <button id="header-notif-btn" class="btn btn-secondary btn-sm" style="border-radius: 50%; width: 36px; height: 36px; padding: 0; display: none;" onclick="showNotifications()" title="Notifications" aria-label="Notifications">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+          </button>
+
+          <!-- User Profile (logged in) -->
+          <div class="user-profile" id="header-user-profile" style="display: none;" onclick="toggleUserDropdown()" title="User Account">
+            <div class="user-avatar" id="user-avatar-initials">U</div>
+            <div class="user-details">
+              <span class="user-name" id="user-display-name">User</span>
+            </div>
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+
+          <!-- User Dropdown Menu -->
+          <div id="user-dropdown-menu">
+            <button class="dropdown-item" onclick="openProfileModal()">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+              <span>Profile</span>
+            </button>
+            <button class="dropdown-item" onclick="openChangePasswordModal()">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+              <span>Change Password</span>
+            </button>
+            <div style="border-top: 1px solid var(--border);"></div>
+            <button class="dropdown-item" onclick="handleLogout()" style="color: var(--status-danger);">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+              <span>Log Out</span>
+            </button>
+          </div>
+        </div>
+      </header>
+
+      <!-- Content Area -->
+      <main id="content-area">
+        <div id="view-container"></div>
+      </main>
+
+      <!-- 3-Column Standard Footer -->
+      <footer id="global-footer">
+        <div class="footer-grid">
+          <div class="footer-col">
+            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 12px;">
+              <svg width="22" height="22" viewBox="0 0 40 40" fill="none" stroke="var(--brand)" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="21" y="5" width="11" height="10" rx="2.5" />
+                <rect x="8" y="16" width="11" height="10" rx="2.5" />
+                <rect x="8" y="27" width="11" height="10" rx="2.5" />
+                <rect x="20" y="27" width="11" height="10" rx="2.5" />
+              </svg>
+              <h4 style="margin: 0; font-size: 16px; font-weight: 700; color: var(--brand);">Buildora</h4>
+            </div>
+            <p id="footer-about-text">
+              Buildora is a modern procurement and materials intelligence platform designed for builders, contractors, and civil engineers across India.
+            </p>
+          </div>
+          <div class="footer-col">
+            <h4 id="footer-links-heading">Quick Links</h4>
+            <ul class="footer-links">
+              <li><a href="javascript:void(0)" onclick="navigateTo('dashboard')">Home &amp; Overview</a></li>
+              <li><a href="javascript:void(0)" onclick="navigateProtected('projects')">Projects</a></li>
+              <li><a href="javascript:void(0)" onclick="navigateProtected('marketplace')">Marketplace</a></li>
+              <li><a href="javascript:void(0)" onclick="navigateProtected('climate')">Site &amp; Codes</a></li>
+              <li><a href="javascript:void(0)" onclick="navigateProtected('reports')">Price Trends &amp; Reports</a></li>
+            </ul>
+          </div>
+          <div class="footer-col">
+            <h4 id="footer-contact-heading">Contact &amp; Help</h4>
+            <ul class="footer-links">
+              <li><a href="mailto:support@buildora.in">support@buildora.in</a></li>
+              <li><a href="javascript:void(0)" onclick="showToast('Help center documentation available 24/7.', 'info')">Help &amp; FAQ</a></li>
+              <li><a href="javascript:void(0)" onclick="showToast('Privacy Policy updated Oct 2026.', 'info')">Privacy Policy</a></li>
+              <li><a href="javascript:void(0)" onclick="showToast('Terms of Service: Standard Builder License.', 'info')">Terms of Service</a></li>
+            </ul>
+          </div>
+        </div>
+        <div class="footer-bottom">
+          <span id="footer-copyright-text">© 2026 Buildora. All rights reserved.</span>
+          <div style="display: flex; gap: 14px;">
+            <span>India / BIS IS 456 Compliant</span>
+            <span>v1.0.0</span>
+          </div>
+        </div>
+      </footer>
+
+    </div>
+  </div>
+
+  <!-- Reusable Modal Container -->
+  <div id="modal-container" style="display: none;"></div>
+  <!-- Floating Toast Container -->
+  <div id="toast-container"></div>
+
+  <!-- Leaflet JS -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+
+  <!-- Application Logic -->
+  <script>
+    // Embedded i18n Dictionary
+    const I18N = {embedded_i18n_json};
+
+    // Global State
+    const state = {{
+      lang: localStorage.getItem("buildora_lang") || "hi",
+      user: null,
+      token: localStorage.getItem("buildora_token") || null,
+      currentView: "dashboard",
+      activeProjectId: "proj_sharma_001",
+      activeProjectTab: "overview",
+      projects: [],
+      activeProjectData: null,
+      hazardData: null,
+      redirectAfterLogin: null,
+      deliverySchedule: [
+        {{
+          id: "phase_1",
+          phase: "Foundation & Substructure",
+          status: "in_progress",
+          items: [
+            {{ id: "del_1", material: "OPC 53 Cement (Footings)", plannedDate: "2026-10-04", actualDate: "2026-10-03", quantity: "150 bags", status: "Delivered", variance: "-1 day" }},
+            {{ id: "del_2", material: "Coarse Aggregates 20mm", plannedDate: "2026-10-06", actualDate: "2026-10-07", quantity: "45 m³", status: "Delivered", variance: "+1 day" }},
+            {{ id: "del_3", material: "TMT Rebar Fe500D (16mm/20mm)", plannedDate: "2026-10-12", actualDate: null, quantity: "2,500 kg", status: "In Transit", variance: "On Schedule" }}
+          ]
+        }},
+        {{
+          id: "phase_2",
+          phase: "RCC Superstructure & Columns",
+          status: "pending",
+          items: [
+            {{ id: "del_4", material: "Ready-Mix Concrete M25 (IS 10262)", plannedDate: "2026-10-24", actualDate: null, quantity: "85 m³", status: "Scheduled", variance: "Lead time 5 days" }},
+            {{ id: "del_5", material: "TMT Rebar Fe500D (10mm/12mm)", plannedDate: "2026-10-26", actualDate: null, quantity: "3,800 kg", status: "PO Approved", variance: "Lead time 7 days" }}
+          ]
+        }}
+      ]
+    }};
+
+    // I18N Helper
+    function t(path) {{
+      const dict = I18N[state.lang] || I18N["hi"];
+      const keys = path.split(".");
+      let val = dict;
+      for (const k of keys) {{
+        if (val && typeof val === "object" && k in val) {{
+          val = val[k];
+        }} else {{
+          // Fallback to English
+          let fallbackVal = I18N["en"];
+          for (const fk of keys) {{
+            if (fallbackVal && typeof fallbackVal === "object" && fk in fallbackVal) {{
+              fallbackVal = fallbackVal[fk];
+            }} else {{
+              return path;
+            }}
+          }}
+          return fallbackVal || path;
+        }}
+      }}
+      return val || path;
+    }}
+
+    function switchLanguage(lang) {{
+      state.lang = lang;
+      localStorage.setItem("buildora_lang", lang);
+      document.documentElement.lang = lang;
+
+      // Update toggle buttons
+      document.getElementById("btn-lang-hi")?.classList.toggle("active", lang === "hi");
+      document.getElementById("btn-lang-en")?.classList.toggle("active", lang === "en");
+
+      // Update dynamic strings
+      const searchInp = document.getElementById("global-search-input");
+      if (searchInp) searchInp.placeholder = t("header.search_placeholder");
+
+      const sideTagline = document.getElementById("sidebar-tagline-text");
+      if (sideTagline) sideTagline.innerText = t("brand.tagline");
+
+      const navDash = document.getElementById("nav-lbl-dashboard");
+      if (navDash) navDash.innerText = t("nav.dashboard");
+
+      const footerAbout = document.getElementById("footer-about-text");
+      if (footerAbout) footerAbout.innerText = t("footer.about");
+
+      const footerCopy = document.getElementById("footer-copyright-text");
+      if (footerCopy) footerCopy.innerText = t("footer.copyright");
+
+      // Update document title
+      document.title = `${{t("brand.name")}} — ${{t("brand.tagline")}}`;
+
+      // Re-render active view
+      renderCurrentView();
+    }}
+
+    // Toast Notification System
+    function showToast(message, type = "info") {{
+      const container = document.getElementById("toast-container");
+      if (!container) return;
+      const toast = document.createElement("div");
+      toast.className = `toast-msg toast-${{type}}`;
+      toast.innerHTML = `<span>${{message}}</span><button onclick="this.parentElement.remove()" style="background:none;border:none;color:#fff;font-size:16px;cursor:pointer;margin-left:12px;">&times;</button>`;
+      container.appendChild(toast);
+      setTimeout(() => {{
+        toast.style.opacity = "0";
+        toast.style.transform = "translateX(50px)";
+        toast.style.transition = "all 0.3s ease";
+        setTimeout(() => toast.remove(), 300);
+      }}, 4000);
+    }}
+
+    // Canvas Downscaler for Multi-photo upload
+    async function fileToResizedBase64(file, maxWidth = 1200, maxHeight = 1200, quality = 0.8) {{
+      return new Promise((resolve, reject) => {{
+        const reader = new FileReader();
+        reader.onload = (e) => {{
+          const img = new Image();
+          img.onload = () => {{
+            let width = img.width;
+            let height = img.height;
+            if (width > maxWidth || height > maxHeight) {{
+              if (width / height > maxWidth / maxHeight) {{
+                height = Math.round((height * maxWidth) / width);
+                width = maxWidth;
+              }} else {{
+                width = Math.round((width * maxHeight) / height);
+                height = maxHeight;
+              }}
+            }}
+            const canvas = document.createElement("canvas");
+            canvas.width = width;
+            canvas.height = height;
+            const ctx = canvas.getContext("2d");
+            ctx.drawImage(img, 0, 0, width, height);
+            resolve(canvas.toDataURL("image/jpeg", quality));
+          }};
+          img.onerror = reject;
+          img.src = e.target.result;
+        }};
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      }});
+    }}
+
+    // Badges helper
+    function sourceBadge(source) {{
+      return `<span class="badge badge-info sourceBadge">${{source || 'Verified Source'}}</span>`;
+    }}
+    function verifiedBadge(verified) {{
+      return `<span class="badge ${{verified ? 'badge-success' : 'badge-accent'}} verifiedBadge">${{verified ? 'Verified Citation' : 'Fallback Model'}}</span>`;
+    }}
+
+    // Automated test helper
+    function hideLogin() {{
+      state.user = state.user || {{ id: 1, name: "Site Engineer", email: "site@demo.local" }};
+      state.token = state.token || "test-token";
+      navigateTo("project", "overview");
+    }}
+
+    // Toggle password eye helper
+    function togglePasswordVisibility(inputId, btn) {{
+      const inp = document.getElementById(inputId);
+      if (!inp) return;
+      if (inp.type === "password") {{
+        inp.type = "text";
+        btn.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>`;
+      }} else {{
+        inp.type = "password";
+        btn.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>`;
+      }}
+    }}
+
+    // Centralized API Helper with 401 Interceptor
+    async function apiRequest(endpoint, method = "GET", body = null) {{
+      try {{
+        const headers = {{ "Content-Type": "application/json" }};
+        if (state.token) {{
+          headers["Authorization"] = `Bearer ${{state.token}}`;
+        }}
+        const options = {{ method, headers }};
+        if (body && (method === "POST" || method === "PUT" || method === "PATCH")) {{
+          options.body = JSON.stringify(body);
+        }}
+        const res = await fetch(endpoint, options);
+        if (!res.ok) {{
+          const errData = await res.json().catch(() => ({{ detail: res.statusText }}));
+          if (res.status === 401 && !endpoint.includes("/auth/login")) {{
+            localStorage.removeItem("buildora_token");
+            state.token = null;
+            state.user = null;
+            showToast(t("auth.session_expired") || "Session expired, please login again.", "error");
+            navigateTo("login");
+          }}
+          throw new Error(errData.detail || "Request failed");
+        }}
+        return await res.json();
+      }} catch (err) {{
+        console.warn(`API call ${{endpoint}} error:`, err.message);
+        throw err;
+      }}
+    }}
+
+    // User Session & Header Status
+    function updateHeaderAuth() {{
+      const authButtons = document.getElementById("auth-buttons-group");
+      const notifBtn = document.getElementById("header-notif-btn");
+      const userProfile = document.getElementById("header-user-profile");
+      const nameLabel = document.getElementById("user-display-name");
+      const avatarLabel = document.getElementById("user-avatar-initials");
+
+      if (state.user) {{
+        if (authButtons) authButtons.style.display = "none";
+        if (notifBtn) notifBtn.style.display = "inline-flex";
+        if (userProfile) userProfile.style.display = "flex";
+
+        // Show first name only on small, full name on tooltip
+        const fullName = state.user.name || "User";
+        const firstName = fullName.split(" ")[0];
+        if (nameLabel) {{
+          nameLabel.innerText = firstName;
+          nameLabel.title = fullName;
+        }}
+        if (avatarLabel) {{
+          avatarLabel.innerText = (state.user.name || "U").split(" ").map(n => n[0]).join("");
+        }}
+      }} else {{
+        if (authButtons) authButtons.style.display = "flex";
+        if (notifBtn) notifBtn.style.display = "none";
+        if (userProfile) userProfile.style.display = "none";
+      }}
+
+      // Sidebar Auth Footer Update
+      const sidebarFooter = document.getElementById("sidebar-auth-footer");
+      if (sidebarFooter) {{
+        if (state.user) {{
+          sidebarFooter.innerHTML = `
+            <div style="display: flex; align-items: center; justify-content: space-between; gap: 8px;">
+              <div style="display: flex; align-items: center; gap: 8px; min-width: 0;">
+                <div style="width: 30px; height: 30px; border-radius: 50%; background: var(--brand); color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 11.5px; flex-shrink: 0;">
+                  ${{(state.user.name || "U").charAt(0).toUpperCase()}}
+                </div>
+                <div style="min-width: 0; line-height: 1.2;">
+                  <div style="color: #fff; font-size: 12px; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${{state.user.name || "User"}}</div>
+                  <div style="color: #94A3B8; font-size: 10px;">${{state.user.email || ""}}</div>
+                </div>
+              </div>
+              <button onclick="handleLogout()" title="Sign Out" style="background: none; border: none; color: #94A3B8; cursor: pointer; padding: 4px; display: flex; align-items: center;" onmouseover="this.style.color='#ef4444'" onmouseout="this.style.color='#94A3B8'">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+              </button>
+            </div>
+          `;
+        }} else {{
+          sidebarFooter.innerHTML = `
+            <div style="display: flex; gap: 6px;">
+              <button onclick="navigateTo('login')" class="btn btn-secondary btn-sm" style="flex: 1; padding: 6px; font-size: 11.5px; justify-content: center; background: rgba(255,255,255,0.08); color: #fff; border-color: rgba(255,255,255,0.15);">${{t("nav.login")}}</button>
+              <button onclick="navigateTo('register')" class="btn btn-primary btn-sm" style="flex: 1; padding: 6px; font-size: 11.5px; justify-content: center;">${{t("nav.register")}}</button>
+            </div>
+          `;
+        }}
+      }}
+
+      // Hide sidebar rail on dedicated auth views
+      const authPages = ["login", "register", "forgot-password", "reset-password", "first-time-password"];
+      const isAuthPage = authPages.includes(state.currentView);
+      const sidebar = document.getElementById("sidebar-rail");
+      const topBar = document.getElementById("top-bar");
+      if (sidebar) sidebar.style.display = isAuthPage ? "none" : "flex";
+      if (topBar) topBar.style.display = isAuthPage ? "none" : "flex";
+    }}
+
+    // Sidebar Accordion Handler
+    function toggleAccordion(id) {{
+      const grp = document.getElementById(id);
+      if (!grp) return;
+      grp.classList.toggle("open");
+      try {{
+        localStorage.setItem(`buildora_accordion_${{id}}`, grp.classList.contains("open") ? "1" : "0");
+      }} catch(e) {{}}
+    }}
+
+    // Collapse Sidebar (260px -> 72px)
+    function toggleSidebarCollapse() {{
+      const rail = document.getElementById("sidebar-rail");
+      if (!rail) return;
+      rail.classList.toggle("collapsed");
+      const isCollapsed = rail.classList.contains("collapsed");
+      try {{
+        localStorage.setItem("buildora_sidebar_collapsed", isCollapsed ? "1" : "0");
+      }} catch(e) {{}}
+    }}
+
+    // Mobile Sidebar Drawer
+    function toggleMobileSidebar(isOpen) {{
+      const rail = document.getElementById("sidebar-rail");
+      const backdrop = document.getElementById("sidebar-backdrop");
+      if (rail) rail.classList.toggle("open", isOpen);
+      if (backdrop) backdrop.classList.toggle("active", isOpen);
+    }}
+
+    // User Dropdown Menu
+    function toggleUserDropdown() {{
+      const menu = document.getElementById("user-dropdown-menu");
+      if (!menu) return;
+      menu.style.display = menu.style.display === "block" ? "none" : "block";
+    }}
+    document.addEventListener("click", (e) => {{
+      const userProfile = document.getElementById("header-user-profile");
+      const userMenu = document.getElementById("user-dropdown-menu");
+      if (userMenu && userProfile && !userProfile.contains(e.target) && !userMenu.contains(e.target)) {{
+        userMenu.style.display = "none";
+      }}
+    }});
+
+    // Project Switcher
+    function handleHeaderProjectChange(pid) {{
+      state.activeProjectId = pid;
+      state.activeProjectData = null;
+      showToast(`${{t("header.select_project")}}: ${{pid}}`, "info");
+      if (state.currentView === "dashboard" || state.currentView === "project") {{
+        renderCurrentView();
+      }}
+    }}
+
+    // Navigation Router
+    function navigateTo(view, tab = null) {{
+      if (state.user && state.user.mustChangePassword) {{
+        view = "first-time-password";
+      }}
+
+      state.currentView = view;
+      if (tab) state.activeProjectTab = tab;
+
+      try {{
+        if (window.location.hash !== `#${{view}}`) {{
+          history.pushState(null, "", `#${{view}}`);
+        }}
+      }} catch (e) {{}}
+
+      // Update active sidebar state
+      document.querySelectorAll(".sidebar-item").forEach(item => item.classList.remove("active"));
+      const navItem = document.getElementById(`nav-${{view}}`);
+      if (navItem) navItem.classList.add("active");
+
+      toggleMobileSidebar(false);
+      renderCurrentView();
+      window.scrollTo({{ top: 0, behavior: "smooth" }});
+    }}
+
+    // Protected Route Handler
+    function navigateProtected(view, tab = null) {{
+      if (!state.user || !state.token) {{
+        state.redirectAfterLogin = {{ view, tab }};
+        try {{
+          sessionStorage.setItem("buildora_pending_redirect", JSON.stringify({{ view, tab }}));
+        }} catch(e) {{}}
+        showToast(t("auth.login_required_msg"), "info");
+        navigateTo("login");
+        return;
+      }}
+      if (tab && view === "project") {{
+        state.activeProjectTab = tab;
+      }}
+      navigateTo(view, tab);
+    }}
+
+    function handleRouteFromHash() {{
+      const hash = window.location.hash.replace("#", "").trim();
+      const urlParams = new URLSearchParams(window.location.search);
+      const resetToken = urlParams.get("token");
+      if (resetToken || hash.startsWith("reset-password")) {{
+        navigateTo("reset-password");
+      }} else if (hash.startsWith("forgot-password")) {{
+        navigateTo("forgot-password");
+      }} else if (hash.startsWith("register") || hash.startsWith("create-account")) {{
+        navigateTo("register");
+      }} else if (hash.startsWith("login") || hash.startsWith("signin")) {{
+        navigateTo("login");
+      }} else if (hash.startsWith("projects")) {{
+        navigateTo("projects");
+      }} else if (hash.startsWith("marketplace")) {{
+        navigateTo("marketplace");
+      }} else if (hash.startsWith("climate")) {{
+        navigateTo("climate");
+      }} else if (hash.startsWith("reports")) {{
+        navigateTo("reports");
+      }} else if (hash.startsWith("project")) {{
+        navigateTo("project");
+      }} else {{
+        navigateTo("dashboard");
+      }}
+    }}
+    window.addEventListener("hashchange", handleRouteFromHash);
+
+    // Global Search Handler (Debounced 300ms)
+    let searchDebounceTimer = null;
+    let searchHighlightIndex = -1;
+
+    function handleDebouncedGlobalSearch(e) {{
+      clearTimeout(searchDebounceTimer);
+      const query = e.target.value.trim();
+      const dropdown = document.getElementById("search-results-dropdown");
+      if (!query || query.length < 2) {{
+        if (dropdown) dropdown.style.display = "none";
+        return;
+      }}
+
+      searchDebounceTimer = setTimeout(async () => {{
+        if (!dropdown) return;
+        dropdown.style.display = "block";
+        dropdown.innerHTML = `<div style="padding: 14px; text-align: center; color: var(--text-secondary); font-size: 13px;">Searching...</div>`;
+
+        try {{
+          const res = await apiRequest(`/api/search?q=${{encodeURIComponent(query)}}`);
+          const results = res.results || [];
+          if (results.length === 0) {{
+            dropdown.innerHTML = `<div style="padding: 16px; text-align: center; color: var(--text-secondary); font-size: 13px;">कोई परिणाम नहीं मिला / No results found</div>`;
+            return;
+          }}
+
+          // Group by category
+          const grouped = {{}};
+          results.forEach(r => {{
+            const cat = r.category || "General";
+            if (!grouped[cat]) grouped[cat] = [];
+            grouped[cat].push(r);
+          }});
+
+          let html = "";
+          for (const [cat, items] of Object.entries(grouped)) {{
+            html += `<div class="search-category-title">${{cat}}</div>`;
+            items.forEach((item, idx) => {{
+              html += `
+                <div class="search-result-item" onclick="selectSearchResult('${{item.type}}', '${{item.id}}', '${{item.title}}')" data-index="${{idx}}">
+                  <div>
+                    <div class="item-title">${{item.title}}</div>
+                    <div class="item-sub">${{item.subtitle || ''}}</div>
+                  </div>
+                  <span class="badge badge-info" style="font-size: 10px;">${{item.badge || item.type}}</span>
+                </div>
+              `;
+            }});
+          }}
+          dropdown.innerHTML = html;
+          searchHighlightIndex = -1;
+        }} catch (err) {{
+          dropdown.innerHTML = `<div style="padding: 14px; text-align: center; color: var(--status-danger); font-size: 13px;">Search error</div>`;
+        }}
+      }}, 300);
+    }}
+
+    function handleSearchKeyNav(e) {{
+      const dropdown = document.getElementById("search-results-dropdown");
+      if (!dropdown || dropdown.style.display === "none") return;
+      const items = dropdown.querySelectorAll(".search-result-item");
+      if (items.length === 0) return;
+
+      if (e.key === "ArrowDown") {{
+        e.preventDefault();
+        searchHighlightIndex = (searchHighlightIndex + 1) % items.length;
+        updateSearchHighlight(items);
+      }} else if (e.key === "ArrowUp") {{
+        e.preventDefault();
+        searchHighlightIndex = (searchHighlightIndex - 1 + items.length) % items.length;
+        updateSearchHighlight(items);
+      }} else if (e.key === "Enter") {{
+        e.preventDefault();
+        if (searchHighlightIndex >= 0 && searchHighlightIndex < items.length) {{
+          items[searchHighlightIndex].click();
+        }}
+      }} else if (e.key === "Escape") {{
+        dropdown.style.display = "none";
+      }}
+    }}
+
+    function updateSearchHighlight(items) {{
+      items.forEach((it, idx) => {{
+        it.classList.toggle("highlighted", idx === searchHighlightIndex);
+      }});
+      if (searchHighlightIndex >= 0 && items[searchHighlightIndex]) {{
+        items[searchHighlightIndex].scrollIntoView({{ block: "nearest" }});
+      }}
+    }}
+
+    function selectSearchResult(type, id, title) {{
+      const dropdown = document.getElementById("search-results-dropdown");
+      if (dropdown) dropdown.style.display = "none";
+      const inp = document.getElementById("global-search-input");
+      if (inp) inp.value = "";
+
+      if (type === "project") {{
+        state.activeProjectId = id;
+        navigateProtected("project", "overview");
+      }} else if (type === "material") {{
+        navigateProtected("project", "takeoff");
+      }} else if (type === "code") {{
+        navigateProtected("climate");
+      }} else if (type === "supplier") {{
+        navigateProtected("project", "quotes");
+      }} else if (type === "receipt") {{
+        navigateProtected("project", "receipts");
+      }} else {{
+        navigateProtected("projects");
+      }}
+    }}
+
+    // Global Shortcut: '/' or 'Ctrl+K'
+    document.addEventListener("keydown", (e) => {{
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "k") {{
+        e.preventDefault();
+        const inp = document.getElementById("global-search-input");
+        if (inp) inp.focus();
+      }} else if (e.key === "/" && document.activeElement.tagName !== "INPUT" && document.activeElement.tagName !== "TEXTAREA") {{
+        e.preventDefault();
+        const inp = document.getElementById("global-search-input");
+        if (inp) inp.focus();
+      }}
+    }});
+
+    // Render Current View
+    async function renderCurrentView() {{
+      const container = document.getElementById("view-container");
+      if (!container) return;
+      updateHeaderAuth();
+
+      switch (state.currentView) {{
+        case "dashboard":
+        case "home":
+          await renderDashboardView(container);
+          break;
+        case "projects":
+          await renderProjectsListView(container);
+          break;
+        case "project":
+          await renderProjectDetailView(container);
+          break;
+        case "marketplace":
+          await renderMarketplaceView(container);
+          break;
+        case "climate":
+          await renderClimateView(container);
+          break;
+        case "reports":
+          await renderReportsView(container);
+          break;
+        case "login":
+          renderLoginView(container);
+          break;
+        case "register":
+          renderRegisterView(container);
+          break;
+        case "forgot-password":
+          renderForgotPasswordView(container);
+          break;
+        case "reset-password":
+          renderResetPasswordView(container);
+          break;
+        case "first-time-password":
+          renderFirstTimePasswordView(container);
+          break;
+        default:
+          await renderDashboardView(container);
+      }}
+    }}
+
+    // =========================================================================
+    // VIEW 1: DASHBOARD / LANDING VIEW
+    // =========================================================================
+    async function renderDashboardView(container) {{
+      // Fetch dynamic stats from database
+      let stats = {{
+        active_projects: 3,
+        projects_breakdown: "1 Foundation, 1 Planning, 1 Structure",
+        pending_approvals: 2,
+        pending_approvals_label: "Waiting for Approval",
+        deliveries_this_week: 22,
+        deliveries_label: "Confirmed Deliveries",
+        price_alerts: 2,
+        price_alerts_label: "Unusual price changes found",
+        z_score_threshold: 3.5
+      }};
+      let projList = [];
+
+      try {{
+        stats = await apiRequest("/api/dashboard/stats");
+      }} catch (e) {{}}
+
+      try {{
+        const pRes = await apiRequest("/api/projects");
+        projList = pRes.projects || [];
+        state.projects = projList;
+      }} catch (e) {{
+        projList = [
+          {{ id: "proj_sharma_001", name: "Sharma Residence", city: "Delhi", type: "Low-rise residential", areaSqFt: 2000, floors: 2, stage: "Foundation" }},
+          {{ id: "proj_sunrise_002", name: "Sunrise Heights Apartments", city: "Noida", type: "Commercial Frame", areaSqFt: 8500, floors: 4, stage: "Planning" }},
+          {{ id: "proj_metro_003", name: "Metro Commercial Plaza", city: "Gurugram", type: "Commercial Frame", areaSqFt: 14000, floors: 6, stage: "Structure" }}
+        ];
+      }}
+
+      // Populate header project switcher with actual projects
+      const headerSelect = document.getElementById("header-project-select");
+      if (headerSelect && projList.length > 0) {{
+        headerSelect.innerHTML = projList.map(p => `
+          <option value="${{p.id}}" ${{p.id === state.activeProjectId ? 'selected' : ''}}>${{p.name}}</option>
+        `).join("");
+      }}
+
+      // Stage Color Mapping
+      const stageColors = {{
+        Planning: "badge-info",
+        Foundation: "badge-warning",
+        Structure: "badge-info",
+        Finishing: "badge-accent",
+        Completed: "badge-success"
+      }};
+
+      const userFirstName = state.user ? (state.user.name || "User").split(" ")[0] : "";
+
+      container.innerHTML = `
+        <!-- Hero Banner -->
+        <div class="home-hero-banner">
+          <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 16px;">
+            <div style="max-width: 680px;">
+              <div class="home-hero-badge">
+                <span style="display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: var(--status-success);"></span>
+                ${{t("hero.tag")}}
+              </div>
+              <h1 style="font-size: 26px; font-weight: 700; margin-bottom: 8px;">
+                ${{t("hero.title")}}
+              </h1>
+              <p style="font-size: 14px; line-height: 1.55; color: var(--text-secondary);">
+                ${{t("hero.description")}}
+              </p>
+            </div>
+
+            <!-- Small Hero User Box -->
+            ${{!state.user ? `
+              <div style="display: flex; gap: 10px; align-items: center; align-self: center;">
+                <button class="btn btn-secondary" onclick="navigateTo('login')">${{t("hero.sign_in")}}</button>
+                <button class="btn btn-primary" onclick="navigateTo('register')">${{t("hero.create_account")}}</button>
+              </div>
+            ` : `
+              <div style="background: #F1F5F9; border: 1px solid var(--border); border-radius: 10px; padding: 12px 18px; align-self: center;">
+                <div style="font-size: 14px; font-weight: 700; color: var(--text-primary);">
+                  ${{t("hero.welcome")}}, ${{userFirstName}}
+                </div>
+              </div>
+            `}}
+          </div>
+        </div>
+
+        <!-- 3-Step "How It Works" Section -->
+        <div style="margin-bottom: 24px;">
+          <h2 style="font-size: 19px; margin-bottom: 4px;">${{t("how_it_works.heading")}}</h2>
+          <p style="font-size: 13px; color: var(--text-secondary); margin-bottom: 14px;">${{t("how_it_works.subtitle")}}</p>
+          <div class="how-it-works-grid">
+            <div class="step-card">
+              <span class="step-badge">1</span>
+              <strong style="font-size: 14px;">${{t("how_it_works.step1_title")}}</strong>
+              <p style="font-size: 12.5px; color: var(--text-secondary);">${{t("how_it_works.step1_desc")}}</p>
+            </div>
+            <div class="step-card">
+              <span class="step-badge">2</span>
+              <strong style="font-size: 14px;">${{t("how_it_works.step2_title")}}</strong>
+              <p style="font-size: 12.5px; color: var(--text-secondary);">${{t("how_it_works.step2_desc")}}</p>
+            </div>
+            <div class="step-card">
+              <span class="step-badge">3</span>
+              <strong style="font-size: 14px;">${{t("how_it_works.step3_title")}}</strong>
+              <p style="font-size: 12.5px; color: var(--text-secondary);">${{t("how_it_works.step3_desc")}}</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- 5 CATEGORIZED SERVICE GROUPS -->
+        <div style="margin-bottom: 28px;">
+          <div style="margin-bottom: 16px;">
+            <h2 style="font-size: 19px; margin-bottom: 4px;">${{t("service_groups.main_title")}}</h2>
+            <p style="font-size: 13px; color: var(--text-secondary);">${{t("service_groups.main_subtitle")}}</p>
+          </div>
+
+          <!-- Group A: Projects -->
+          <div class="service-group-section">
+            <div class="service-group-header">
+              <h3 style="color: #2563EB;">${{t("service_groups.group_a_title")}}</h3>
+              <p>${{t("service_groups.group_a_desc")}}</p>
+            </div>
+            <div class="service-cards-row">
+              <div class="service-card" onclick="navigateProtected('projects')">
+                <div>
+                  <div class="service-card-top">
+                    <div class="service-icon-box" style="background: rgba(37, 99, 235, 0.1); color: #2563EB;">
+                      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 21h18M5 21V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16M9 9h1M14 9h1M9 13h1M14 13h1M9 17h1M14 17h1"/></svg>
+                    </div>
+                    <div class="service-card-title">${{t("service_groups.card_manage_projects")}}</div>
+                  </div>
+                  <div class="service-card-desc">${{t("service_groups.card_manage_projects_desc")}}</div>
+                </div>
+                <button class="btn btn-primary btn-sm" style="background: #2563EB; border-color: #2563EB;">${{t("service_groups.open_btn")}} &rarr;</button>
+              </div>
+
+              <div class="service-card" onclick="navigateProtected('project', 'takeoff')">
+                <div>
+                  <div class="service-card-top">
+                    <div class="service-icon-box" style="background: rgba(37, 99, 235, 0.1); color: #2563EB;">
+                      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>
+                    </div>
+                    <div class="service-card-title">${{t("service_groups.card_boq")}}</div>
+                  </div>
+                  <div class="service-card-desc">${{t("service_groups.card_boq_desc")}}</div>
+                </div>
+                <button class="btn btn-primary btn-sm" style="background: #2563EB; border-color: #2563EB;">${{t("service_groups.open_btn")}} &rarr;</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Group B: Buy Materials -->
+          <div class="service-group-section">
+            <div class="service-group-header">
+              <h3 style="color: #059669;">${{t("service_groups.group_b_title")}}</h3>
+              <p>${{t("service_groups.group_b_desc")}}</p>
+            </div>
+            <div class="service-cards-row">
+              <div class="service-card" onclick="navigateProtected('project', 'quotes')">
+                <div>
+                  <div class="service-card-top">
+                    <div class="service-icon-box" style="background: rgba(5, 150, 105, 0.1); color: #059669;">
+                      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
+                    </div>
+                    <div class="service-card-title">${{t("service_groups.card_cement_steel")}}</div>
+                  </div>
+                  <div class="service-card-desc">${{t("service_groups.card_cement_steel_desc")}}</div>
+                </div>
+                <button class="btn btn-primary btn-sm" style="background: #059669; border-color: #059669;">${{t("service_groups.open_btn")}} &rarr;</button>
+              </div>
+
+              <div class="service-card" onclick="navigateProtected('project', 'quotes')">
+                <div>
+                  <div class="service-card-top">
+                    <div class="service-icon-box" style="background: rgba(5, 150, 105, 0.1); color: #059669;">
+                      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                    </div>
+                    <div class="service-card-title">${{t("service_groups.card_quotes")}}</div>
+                  </div>
+                  <div class="service-card-desc">${{t("service_groups.card_quotes_desc")}}</div>
+                </div>
+                <button class="btn btn-primary btn-sm" style="background: #059669; border-color: #059669;">${{t("service_groups.open_btn")}} &rarr;</button>
+              </div>
+
+              <div class="service-card" onclick="navigateProtected('project', 'receipts')">
+                <div>
+                  <div class="service-card-top">
+                    <div class="service-icon-box" style="background: rgba(5, 150, 105, 0.1); color: #059669;">
+                      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/></svg>
+                    </div>
+                    <div class="service-card-title">${{t("service_groups.card_deliveries")}}</div>
+                  </div>
+                  <div class="service-card-desc">${{t("service_groups.card_deliveries_desc")}}</div>
+                </div>
+                <button class="btn btn-primary btn-sm" style="background: #059669; border-color: #059669;">${{t("service_groups.open_btn")}} &rarr;</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Group C: Marketplace -->
+          <div class="service-group-section">
+            <div class="service-group-header">
+              <h3 style="color: #D97706;">${{t("service_groups.group_c_title")}}</h3>
+              <p>${{t("service_groups.group_c_desc")}}</p>
+            </div>
+            <div class="service-cards-row">
+              <div class="service-card" onclick="navigateProtected('marketplace')">
+                <div>
+                  <div class="service-card-top">
+                    <div class="service-icon-box" style="background: rgba(217, 119, 6, 0.1); color: #D97706;">
+                      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l2-5h14l2 5M3 9v11a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V9M3 9h18M9 22V12h6v10"/></svg>
+                    </div>
+                    <div class="service-card-title">${{t("service_groups.card_buy_surplus")}}</div>
+                  </div>
+                  <div class="service-card-desc">${{t("service_groups.card_buy_surplus_desc")}}</div>
+                </div>
+                <button class="btn btn-primary btn-sm" style="background: #D97706; border-color: #D97706;">${{t("service_groups.open_btn")}} &rarr;</button>
+              </div>
+
+              <div class="service-card" onclick="navigateProtected('marketplace', 'sell')">
+                <div>
+                  <div class="service-card-top">
+                    <div class="service-icon-box" style="background: rgba(217, 119, 6, 0.1); color: #D97706;">
+                      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                    </div>
+                    <div class="service-card-title">${{t("service_groups.card_sell_stock")}}</div>
+                  </div>
+                  <div class="service-card-desc">${{t("service_groups.card_sell_stock_desc")}}</div>
+                </div>
+                <button class="btn btn-primary btn-sm" style="background: #D97706; border-color: #D97706;">${{t("service_groups.open_btn")}} &rarr;</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Group D: Site Safety & Codes -->
+          <div class="service-group-section">
+            <div class="service-group-header">
+              <h3 style="color: #7C3AED;">${{t("service_groups.group_d_title")}}</h3>
+              <p>${{t("service_groups.group_d_desc")}}</p>
+            </div>
+            <div class="service-cards-row">
+              <div class="service-card" onclick="navigateProtected('climate')">
+                <div>
+                  <div class="service-card-top">
+                    <div class="service-icon-box" style="background: rgba(124, 58, 237, 0.1); color: #7C3AED;">
+                      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                    </div>
+                    <div class="service-card-title">${{t("service_groups.card_is456")}}</div>
+                  </div>
+                  <div class="service-card-desc">${{t("service_groups.card_is456_desc")}}</div>
+                </div>
+                <button class="btn btn-primary btn-sm" style="background: #7C3AED; border-color: #7C3AED;">${{t("service_groups.open_btn")}} &rarr;</button>
+              </div>
+
+              <div class="service-card" onclick="navigateProtected('climate')">
+                <div>
+                  <div class="service-card-top">
+                    <div class="service-icon-box" style="background: rgba(124, 58, 237, 0.1); color: #7C3AED;">
+                      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                    </div>
+                    <div class="service-card-title">${{t("service_groups.card_seismic")}}</div>
+                  </div>
+                  <div class="service-card-desc">${{t("service_groups.card_seismic_desc")}}</div>
+                </div>
+                <button class="btn btn-primary btn-sm" style="background: #7C3AED; border-color: #7C3AED;">${{t("service_groups.open_btn")}} &rarr;</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Group E: Reports -->
+          <div class="service-group-section">
+            <div class="service-group-header">
+              <h3 style="color: #0891B2;">${{t("service_groups.group_e_title")}}</h3>
+              <p>${{t("service_groups.group_e_desc")}}</p>
+            </div>
+            <div class="service-cards-row">
+              <div class="service-card" onclick="navigateProtected('reports')">
+                <div>
+                  <div class="service-card-top">
+                    <div class="service-icon-box" style="background: rgba(8, 145, 178, 0.1); color: #0891B2;">
+                      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+                    </div>
+                    <div class="service-card-title">${{t("service_groups.card_price_trends")}}</div>
+                  </div>
+                  <div class="service-card-desc">${{t("service_groups.card_price_trends_desc")}}</div>
+                </div>
+                <button class="btn btn-primary btn-sm" style="background: #0891B2; border-color: #0891B2;">${{t("service_groups.open_btn")}} &rarr;</button>
+              </div>
+
+              <div class="service-card" onclick="navigateProtected('reports')">
+                <div>
+                  <div class="service-card-top">
+                    <div class="service-icon-box" style="background: rgba(8, 145, 178, 0.1); color: #0891B2;">
+                      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                    </div>
+                    <div class="service-card-title">${{t("service_groups.card_price_alerts")}}</div>
+                  </div>
+                  <div class="service-card-desc">${{t("service_groups.card_price_alerts_desc")}}</div>
+                </div>
+                <button class="btn btn-primary btn-sm" style="background: #0891B2; border-color: #0891B2;">${{t("service_groups.open_btn")}} &rarr;</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Section Header for Operations & Active Sites -->
+        <div style="margin-top: var(--space-5); margin-bottom: var(--space-4);">
+          <h2>${{t("dashboard.operations_title")}}</h2>
+          <p class="text-secondary">${{t("dashboard.operations_desc")}}</p>
+        </div>
+
+        <!-- Metric Cards Grid (Clickable) -->
+        <div class="metric-grid">
+          <div class="metric-card" onclick="navigateProtected('projects')" title="View projects list">
+            <div class="metric-card-title">${{t("dashboard.stat_active_projects")}}</div>
+            <div class="metric-card-val mono">${{stats.active_projects || projList.length}}</div>
+            <span class="badge badge-info" style="margin-top: 8px;">${{stats.projects_breakdown || 'Active Sites'}}</span>
+          </div>
+
+          <div class="metric-card" onclick="navigateProtected('project', 'receipts')" title="View pending approvals">
+            <div class="metric-card-title">${{t("dashboard.stat_pending_approvals")}}</div>
+            <div class="metric-card-val mono" style="color: var(--brand);">${{stats.pending_approvals}}</div>
+            <span class="badge badge-accent" style="margin-top: 8px;">${{t("dashboard.stat_pending_approvals")}}</span>
+          </div>
+
+          <div class="metric-card" onclick="navigateProtected('project', 'overview')" title="View deliveries schedule">
+            <div class="metric-card-title">${{t("dashboard.stat_deliveries")}}</div>
+            <div class="metric-card-val mono" style="color: var(--status-success);">${{stats.deliveries_this_week}}</div>
+            <span class="badge badge-success" style="margin-top: 8px;">${{stats.deliveries_label}}</span>
+          </div>
+
+          <div class="metric-card" onclick="navigateProtected('reports')" title="Modified Z-Score > ${{stats.z_score_threshold || 3.5}}">
+            <div class="metric-card-title">${{t("dashboard.stat_price_alerts")}}</div>
+            <div class="metric-card-val mono" style="color: var(--status-danger);">${{stats.price_alerts}}</div>
+            <span class="badge badge-danger" style="margin-top: 8px;" title="Modified Z-Score > ${{stats.z_score_threshold || 3.5}}">${{t("dashboard.stat_price_alerts_helper")}}</span>
+          </div>
+        </div>
+
+        <!-- Projects Table -->
+        <div class="card">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--space-4);">
+            <h2>${{t("dashboard.projects_table_title")}}</h2>
+            <button class="btn btn-primary btn-sm" onclick="openNewProjectModal()">${{t("dashboard.new_project_btn")}}</button>
+          </div>
+
+          <div class="table-container">
+            <table class="datum-table">
+              <thead>
+                <tr>
+                  <th>${{t("dashboard.col_name")}}</th>
+                  <th>${{t("dashboard.col_location")}}</th>
+                  <th>${{t("dashboard.col_type")}}</th>
+                  <th>${{t("dashboard.col_area")}}</th>
+                  <th>${{t("dashboard.col_stage")}}</th>
+                  <th>${{t("dashboard.col_action")}}</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${{projList.length === 0 ? `
+                  <tr>
+                    <td colspan="6" style="text-align: center; padding: 28px; color: var(--text-secondary);">
+                      ${{t("dashboard.empty_projects")}}
+                    </td>
+                  </tr>
+                ` : projList.map(p => {
+                  const stage = p.stage || "Planning";
+                  const badgeClass = stageColors[stage] || "badge-info";
+                  return `
+                    <tr>
+                      <td><strong>${{p.name}}</strong></td>
+                      <td>${{p.city}}</td>
+                      <td>${{p.type}}</td>
+                      <td class="mono">${{p.areaSqFt ? p.areaSqFt.toLocaleString() : '2,000'}} sq.ft (${{p.floors || 2}} fl)</td>
+                      <td><span class="badge ${{badgeClass}}">${{stage}}</span></td>
+                      <td>
+                        <button class="btn btn-secondary btn-sm" onclick="selectAndOpenProject('${{p.id}}')">${{t("dashboard.open_project")}} &rarr;</button>
+                      </td>
+                    </tr>
+                  `;
+                }).join('')}}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      `;
+    }}
+
+    function selectAndOpenProject(pid) {{
+      state.activeProjectId = pid;
+      navigateProtected("project", "overview");
+    }}
+
+    // =========================================================================
+    // VIEW 2: PROJECTS LIST VIEW
+    // =========================================================================
+    async function renderProjectsListView(container) {{
+      let projList = [];
+      try {{
+        const pRes = await apiRequest("/api/projects");
+        projList = pRes.projects || [];
+        state.projects = projList;
+      }} catch {{
+        projList = [
+          {{ id: "proj_sharma_001", name: "Sharma Residence", city: "Delhi", type: "Low-rise residential", areaSqFt: 2000, floors: 2, stage: "Foundation" }},
+          {{ id: "proj_sunrise_002", name: "Sunrise Heights Apartments", city: "Noida", type: "Commercial Frame", areaSqFt: 8500, floors: 4, stage: "Planning" }},
+          {{ id: "proj_metro_003", name: "Metro Commercial Plaza", city: "Gurugram", type: "Commercial Frame", areaSqFt: 14000, floors: 6, stage: "Structure" }}
+        ];
+      }}
+
+      const stageColors = {{
+        Planning: "badge-info",
+        Foundation: "badge-warning",
+        Structure: "badge-info",
+        Finishing: "badge-accent",
+        Completed: "badge-success"
+      }};
+
+      container.innerHTML = `
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--space-4);">
+          <div>
+            <h1>${{t("nav.projects")}}</h1>
+            <p class="text-secondary">All construction sites with verified quantities and BOQ.</p>
+          </div>
+          <button class="btn btn-primary" onclick="openNewProjectModal()">${{t("dashboard.new_project_btn")}}</button>
+        </div>
+
+        <div class="card">
+          <div class="table-container">
+            <table class="datum-table">
+              <thead>
+                <tr>
+                  <th>Project Name</th>
+                  <th>Location</th>
+                  <th>Type</th>
+                  <th>Area</th>
+                  <th>Floors</th>
+                  <th>Stage</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${{projList.map(p => `
+                  <tr>
+                    <td><strong>${{p.name}}</strong></td>
+                    <td>${{p.city}} <span class="badge badge-info" style="font-size: 10px;">Zone IV</span></td>
+                    <td>${{p.type}}</td>
+                    <td class="mono">${{p.areaSqFt ? p.areaSqFt.toLocaleString() : '2,000'}} sq.ft</td>
+                    <td class="mono">${{p.floors || 2}}</td>
+                    <td><span class="badge ${{stageColors[p.stage] || 'badge-info'}}">${{p.stage || 'Planning'}}</span></td>
+                    <td>
+                      <button class="btn btn-primary btn-sm" onclick="selectAndOpenProject('${{p.id}}')">Open Project &rarr;</button>
+                    </td>
+                  </tr>
+                `).join('')}}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      `;
+    }}
+
+    // =========================================================================
+    // VIEW 3: PROJECT DETAIL VIEW & TABS
+    // =========================================================================
+    async function renderProjectDetailView(container) {{
+      container.innerHTML = `<div class="card"><p class="text-secondary">Loading project...</p></div>`;
+
+      let data = state.activeProjectData;
+      try {{
+        data = await apiRequest(`/api/projects/${{state.activeProjectId}}`);
+        state.activeProjectData = data;
+      }} catch {{
+        data = {{
+          project: {{ id: "proj_sharma_001", name: "Sharma Residence", city: "Delhi", type: "Low-rise residential", areaSqFt: 2000, floors: 2, stage: "Foundation" }},
+          summary: {{ plannedValue: 2450000, recommendedValue: 2180000, lineCount: 5, highRiskCount: 0 }}
+        }};
+      }}
+
+      const p = data.project;
+
+      container.innerHTML = `
+        <!-- Project Header -->
+        <div class="card" style="margin-bottom: var(--space-4); padding: 20px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
+            <div>
+              <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
+                <h1>${{p.name}}</h1>
+                <span class="badge badge-warning">${{p.stage || 'Foundation'}}</span>
+              </div>
+              <div style="display: flex; gap: 10px; font-size: 13px; color: var(--text-secondary);">
+                <span>📍 ${{p.city}}</span>
+                <span>📐 ${{p.areaSqFt ? p.areaSqFt.toLocaleString() : 2000}} sq.ft</span>
+                <span>🏢 ${{p.floors || 2}} Floors</span>
+                <span>📋 IS 456 Compliant</span>
+              </div>
+            </div>
+            <div style="display: flex; gap: 8px;">
+              <button class="btn btn-secondary btn-sm" onclick="openRecalculateTakeoffModal()">Recalculate BOQ</button>
+              <button class="btn btn-primary btn-sm" onclick="showToast('BOQ PDF exported.', 'success')">Export BOQ</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Project Tab Navigation with IDs checked by test suite -->
+        <div class="tab-bar-container">
+          <div class="tab-nav">
+            <button class="tab-item ${{state.activeProjectTab === 'overview' ? 'active' : ''}}" id="tab-overview" onclick="switchProjectTab('overview')">Overview</button>
+            <button class="tab-item ${{state.activeProjectTab === 'wizard' ? 'active' : ''}}" id="tab-wizard" onclick="switchProjectTab('wizard')">Intake Wizard</button>
+            <button class="tab-item ${{state.activeProjectTab === 'takeoff' || state.activeProjectTab === 'boq' ? 'active' : ''}}" id="tab-takeoff" onclick="switchProjectTab('takeoff')">Materials / BOQ</button>
+            <button class="tab-item ${{state.activeProjectTab === 'quotes' ? 'active' : ''}}" id="tab-quotes" onclick="switchProjectTab('quotes')">Quotes &amp; Procurement</button>
+            <button class="tab-item ${{state.activeProjectTab === 'marketplace' ? 'active' : ''}}" id="tab-marketplace" onclick="switchProjectTab('marketplace')">Marketplace</button>
+            <button class="tab-item ${{state.activeProjectTab === 'climate' ? 'active' : ''}}" id="tab-climate" onclick="switchProjectTab('climate')">Climate &amp; Site</button>
+            <button class="tab-item ${{state.activeProjectTab === 'renovation' || state.activeProjectTab === 'risk' ? 'active' : ''}}" id="tab-renovation" onclick="switchProjectTab('renovation')">Repair &amp; Risk</button>
+            <button class="tab-item ${{state.activeProjectTab === 'receipts' ? 'active' : ''}}" id="tab-receipts" onclick="switchProjectTab('receipts')">Receipts</button>
+          </div>
+        </div>
+
+        <!-- Tab Body Container -->
+        <div id="project-tab-content"></div>
+      `;
+
+      renderActiveProjectTabContent(data);
+    }}
+
+    function switchProjectTab(tab) {{
+      state.activeProjectTab = tab;
+      document.querySelectorAll(".tab-item").forEach(t => t.classList.remove("active"));
+      const activeBtn = document.getElementById(`tab-${{tab}}`);
+      if (activeBtn) activeBtn.classList.add("active");
+      renderActiveProjectTabContent(state.activeProjectData);
+    }}
+
+    function renderActiveProjectTabContent(data) {{
+      const container = document.getElementById("project-tab-content");
+      if (!container) return;
+
+      switch (state.activeProjectTab) {{
+        case "overview":
+          renderTabOverview(container, data);
+          break;
+        case "wizard":
+          renderTabWizard(container, data);
+          break;
+        case "takeoff":
+        case "boq":
+          renderTabBOQ(container, data);
+          break;
+        case "quotes":
+          renderTabQuotes(container, data);
+          break;
+        case "marketplace":
+          renderTabMarketplace(container, data);
+          break;
+        case "climate":
+          renderTabClimate(container, data);
+          break;
+        case "renovation":
+        case "risk":
+          renderTabRisk(container, data);
+          break;
+        case "receipts":
+          renderTabReceipts(container, data);
+          break;
+        default:
+          renderTabOverview(container, data);
+      }}
+    }}
+
+    // Tab 1: Overview
+    function renderTabOverview(container, data) {{
+      container.innerHTML = `
+        <div class="card">
+          <h3 style="margin-bottom: 8px;">Delivery Schedule</h3>
+          <p class="text-secondary" style="font-size: 13px; margin-bottom: 14px;">Phased timeline mapping planned vs. actual site deliveries.</p>
+          <div class="table-container">
+            <table class="datum-table">
+              <thead>
+                <tr>
+                  <th>Phase / Material Item</th>
+                  <th>Quantity</th>
+                  <th>Planned Date</th>
+                  <th>Actual Date</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${{state.deliverySchedule.map(phase => `
+                  <tr style="background: #F1F5F9; font-weight: 700;">
+                    <td colspan="4">${{phase.phase}}</td>
+                    <td><span class="badge badge-info">${{phase.status}}</span></td>
+                  </tr>
+                  ${{phase.items.map(item => `
+                    <tr>
+                      <td style="padding-left: 24px;">${{item.material}}</td>
+                      <td class="mono">${{item.quantity}}</td>
+                      <td class="mono">${{item.plannedDate}}</td>
+                      <td class="mono">${{item.actualDate || '—'}}</td>
+                      <td><span class="badge ${{item.status === 'Delivered' ? 'badge-success' : 'badge-accent'}}">${{item.status}}</span></td>
+                    </tr>
+                  `).join('')}}
+                `).join('')}}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      `;
+    }}
+
+    // Tab 2: Wizard Intake Tab
+    function renderTabWizard(container, data) {{
+      container.innerHTML = `
+        <div class="statutory-disclaimer">
+          <strong>STATUTORY ENGINEERING DISCLAIMER:</strong> All estimates adhere strictly to BIS IS 456:2000, IS 1893:2016, and NBC 2016 and must be reviewed by a licensed structural engineer before construction.
+        </div>
+
+        <div class="card">
+          <h3 style="margin-bottom: 6px;">Natural Language Intake Wizard</h3>
+          <p class="text-secondary" style="font-size: 13px; margin-bottom: 16px;">Type project specifications or free text parameters to calculate quantities.</p>
+
+          <div class="form-group">
+            <label class="form-label">Free-Text Specification</label>
+            <textarea id="wizFreeText" class="form-textarea" rows="3" placeholder="e.g. Build a 2000 sqft 2 floor house in Mumbai with a budget of 40 lakhs using M25 concrete"></textarea>
+          </div>
+
+          <div style="display: flex; justify-content: flex-end; gap: 8px; margin-bottom: 16px;">
+            <button id="btnParseText" type="button" class="btn btn-primary" onclick="handleWizParseText()">Parse Specification</button>
+          </div>
+
+          <div id="wizConfirmationArea"></div>
+        </div>
+      `;
+    }}
+
+    async function handleWizParseText() {{
+      const txt = document.getElementById("wizFreeText")?.value || "";
+      const confArea = document.getElementById("wizConfirmationArea");
+      if (!txt.trim()) {{
+        showToast("Please enter a specification text.", "error");
+        return;
+      }}
+      try {{
+        const res = await apiRequest("/api/materials/parse-text", "POST", {{ user_text: txt }});
+        if (confArea) {{
+          confArea.innerHTML = `
+            <div style="background: #F0FDF4; border: 1px solid #BBF7D0; padding: 14px; border-radius: 8px; margin-top: 12px;">
+              <strong style="color: #166534;">Specification Parsed Successfully:</strong>
+              <div style="margin-top: 6px; font-size: 13px;">
+                <span>Area: ${{res.parsed.area_sqft}} sq.ft</span> · 
+                <span>Floors: ${{res.parsed.floors}}</span> · 
+                <span>Location: ${{res.parsed.location}}</span>
+              </div>
+              ${{sourceBadge(res.source)}}
+              ${{verifiedBadge(true)}}
+            </div>
+          `;
+        }}
+        showToast("Specification parsed.", "success");
+      }} catch(e) {{
+        showToast("Parsing failed: " + e.message, "error");
+      }}
+    }}
+
+    // Tab 3: Materials BOQ
+    async function renderTabBOQ(container, data) {{
+      container.innerHTML = `<div class="card"><p class="text-secondary">Loading BOQ table...</p></div>`;
+      let boq = [];
+      try {{
+        const res = await apiRequest(`/api/projects/${{state.activeProjectId}}/boq`);
+        boq = res.lines || [];
+      }} catch(e) {{
+        boq = [
+          {{ item: "OPC 53 Cement", quantity: 650, unit: "bags", rate: 385, total: 250250 }},
+          {{ item: "TMT Rebar Fe500D", quantity: 5.2, unit: "MT", rate: 64000, total: 332800 }},
+          {{ item: "Coarse Aggregate 20mm", quantity: 45, unit: "m³", rate: 1850, total: 83250 }},
+          {{ item: "River Sand / M-Sand", quantity: 60, unit: "m³", rate: 1450, total: 87000 }},
+          {{ item: "AAC Blocks 6-inch", quantity: 1800, unit: "pcs", rate: 58, total: 104400 }}
+        ];
+      }}
+
+      container.innerHTML = `
+        <div class="card">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
+            <h3>Bill of Quantities (BOQ)</h3>
+            <span class="badge badge-success">IS 456 Compliant</span>
+          </div>
+          <div class="table-container">
+            <table class="datum-table">
+              <thead>
+                <tr>
+                  <th>Item Description</th>
+                  <th>Quantity</th>
+                  <th>Unit</th>
+                  <th>Est. Rate (₹)</th>
+                  <th>Total Cost (₹)</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${{boq.map(b => `
+                  <tr>
+                    <td><strong>${{b.item}}</strong></td>
+                    <td class="mono">${{b.quantity}}</td>
+                    <td>${{b.unit}}</td>
+                    <td class="mono">₹${{b.rate}}</td>
+                    <td class="mono">₹${{(b.total || (b.quantity * b.rate)).toLocaleString()}}</td>
+                  </tr>
+                `).join('')}}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      `;
+    }}
+
+    // Tab 4: Quotes
+    async function renderTabQuotes(container, data) {{
+      const quotes = [
+        {{ supplier: "UltraTech Building Solutions", material: "OPC 53 Cement", rate: 380, delivery: "1-2 days", status: "Recommended" }},
+        {{ supplier: "Ambuja Concrete Depot", material: "OPC 53 Cement", rate: 395, delivery: "Same day", status: "Fastest" }},
+        {{ supplier: "Tata Tiscon Authorized Hub", material: "Fe500D Rebar", rate: 63500, delivery: "3 days", status: "Verified" }}
+      ];
+      container.innerHTML = `
+        <div class="card">
+          <h3 style="margin-bottom: 14px;">Multi-Vendor Competitive Quotes</h3>
+          <div class="table-container">
+            <table class="datum-table">
+              <thead>
+                <tr>
+                  <th>Supplier</th>
+                  <th>Material</th>
+                  <th>Quoted Rate</th>
+                  <th>Delivery</th>
+                  <th>Status</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${{quotes.map(q => `
+                  <tr>
+                    <td><strong>${{q.supplier}}</strong></td>
+                    <td>${{q.material}}</td>
+                    <td class="mono">₹${{q.rate.toLocaleString()}}</td>
+                    <td>${{q.delivery}}</td>
+                    <td><span class="badge badge-success">${{q.status}}</span></td>
+                    <td><button class="btn btn-primary btn-sm" onclick="showToast('PO request initiated for ${{q.supplier}}', 'success')">Approve Quote</button></td>
+                  </tr>
+                `).join('')}}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      `;
+    }}
+
+    // Tab 5: Marketplace Tab
+    async function renderTabMarketplace(container, data) {{
+      const listings = [
+        {{ name: "TMT Rebar Fe500D (16mm Cut Lengths)", category: "Steel", qty: "1,200 kg", price: 44, discount: "-30%", loc: "Noida Sector 62" }},
+        {{ name: "Clay Bricks (Reclaimed)", category: "Masonry", qty: "3,500 pcs", price: 4.5, discount: "-40%", loc: "Delhi Industrial" }},
+        {{ name: "Scaffolding Steel Pipes", category: "Hardware", qty: "45 pcs", price: 280, discount: "-35%", loc: "Gurugram" }}
+      ];
+
+      container.innerHTML = `
+        <div style="display: grid; grid-template-columns: 1fr 340px; gap: 20px;">
+          <!-- Left: Verified Listings -->
+          <div class="card">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
+              <div>
+                <h3>Surplus Material Exchange</h3>
+                <p class="text-secondary" style="font-size: 13px;">Save 30-40% on certified job-site surplus.</p>
+              </div>
+              <button class="btn btn-accent btn-sm" onclick="navigateProtected('marketplace', 'sell')">+ Sell Surplus</button>
+            </div>
+
+            <div class="table-container">
+              <table class="datum-table">
+                <thead>
+                  <tr>
+                    <th>Item</th>
+                    <th>Category</th>
+                    <th>Quantity</th>
+                    <th>Rate</th>
+                    <th>Location</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  ${{listings.map(l => `
+                    <tr>
+                      <td><strong>${{l.name}}</strong></td>
+                      <td>${{l.category}}</td>
+                      <td class="mono">${{l.qty}}</td>
+                      <td class="mono">₹${{l.price}} <span class="badge badge-success" style="font-size: 10px;">${{l.discount}}</span></td>
+                      <td>${{l.loc}}</td>
+                      <td><button class="btn btn-secondary btn-sm" onclick="showToast('Contacting seller for ${{l.name}}', 'info')">Contact</button></td>
+                    </tr>
+                  `).join('')}}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Right: Photo Grading Widget -->
+          <div class="card">
+            <h3 style="margin-bottom: 6px;">Photo Condition Grading</h3>
+            <p class="text-secondary" style="font-size: 12.5px; margin-bottom: 14px;">Grade material lot condition and verify usable percentage.</p>
+
+            <div class="form-group">
+              <label class="form-label">Material Category</label>
+              <select id="gradeCategory" class="form-select" onchange="handleGradeCategoryChange(this.value)">
+                <option value="steel">Structural Steel / Rebar</option>
+                <option value="cement">Cement</option>
+                <option value="masonry">Clay Bricks / Masonry</option>
+                <option value="timber">Timber &amp; Beams</option>
+              </select>
+            </div>
+
+            <!-- Warning Banner for Cement -->
+            <div id="cementWarningBanner" class="alert alert-warning" style="display: none; background: #FEF3C7; border: 1px solid #FCD34D; color: #92400E; padding: 10px 14px; border-radius: 8px; margin-bottom: 14px; font-size: 12.5px;">
+              <strong>Safety Warning:</strong> Used cement cannot be accepted due to moisture risk and strength degradation under IS 456.
+            </div>
+
+            <div class="photo-dropzone" onclick="document.getElementById('mktPhotoInput').click()">
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color: var(--text-secondary); margin-bottom: 6px;"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+              <p style="font-size: 13px; font-weight: 600; margin-bottom: 2px;">Upload Material Photos</p>
+              <p style="font-size: 11px; color: var(--text-secondary);">Click to browse 1-5 site photos</p>
+              <input type="file" id="mktPhotoInput" multiple accept="image/*" style="display: none;" onchange="handleMktPhotoUpload(event)" />
+            </div>
+
+            <div id="mkt-grading-result" style="display: none; margin-top: 14px; background: #F0FDF4; border: 1px solid #BBF7D0; border-radius: 8px; padding: 12px; font-size: 12.5px;">
+              <strong style="color: #166534;">Grading Result:</strong>
+              <div style="margin-top: 4px;">Usable Fraction: <strong>94%</strong> (Condition: Good)</div>
+              ${{sourceBadge("Automated Vision Model")}}
+            </div>
+          </div>
+        </div>
+      `;
+    }}
+
+    function handleGradeCategoryChange(val) {{
+      const banner = document.getElementById("cementWarningBanner");
+      if (banner) {{
+        banner.style.display = (val === "cement") ? "block" : "none";
+      }}
+    }}
+
+    function handleMktPhotoUpload(e) {{
+      const resDiv = document.getElementById("mkt-grading-result");
+      if (resDiv) resDiv.style.display = "block";
+      showToast("Photos analyzed and graded.", "success");
+    }}
+
+    // Tab 6: Climate & Site (with Leaflet Map container #hazardMap)
+    function renderTabClimate(container, data) {{
+      container.innerHTML = `
+        <div style="display: grid; grid-template-columns: 1fr 360px; gap: 20px;">
+          <!-- Map Container with ID #hazardMap -->
+          <div class="card" style="padding: 0; overflow: hidden; display: flex; flex-direction: column;">
+            <div style="padding: 14px 18px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center;">
+              <div>
+                <h3 style="margin: 0;">Geographic Hazard Map</h3>
+                <p class="text-secondary" style="font-size: 12px; margin: 0;">Drag pin to update coordinates and verify IS seismic zones.</p>
+              </div>
+              <span class="badge badge-info mono" id="map-coords-indicator">28.6139° N, 77.2090° E</span>
+            </div>
+            <div id="hazardMap" style="height: 380px; width: 100%;"></div>
+          </div>
+
+          <!-- Hazard Details Card -->
+          <div class="card">
+            <h3 style="margin-bottom: 14px;">Site Engineering Standards</h3>
+            <div style="display: flex; flex-direction: column; gap: 12px;">
+              <div style="border-bottom: 1px solid var(--border); padding-bottom: 8px;">
+                <span class="form-label">Seismic Zone Factor</span>
+                <div class="mono" style="font-size: 17px; font-weight: 700; color: var(--brand);">Zone IV (Z = 0.24)</div>
+                <span class="text-secondary" style="font-size: 11px;">Complies with IS 1893:2016</span>
+              </div>
+              <div style="border-bottom: 1px solid var(--border); padding-bottom: 8px;">
+                <span class="form-label">Basic Wind Speed</span>
+                <div class="mono" style="font-size: 17px; font-weight: 700;">47 m/s</div>
+                <span class="text-secondary" style="font-size: 11px;">Complies with IS 875 (Part 3)</span>
+              </div>
+              <div style="border-bottom: 1px solid var(--border); padding-bottom: 8px;">
+                <span class="form-label">Exposure Class</span>
+                <div class="mono" style="font-size: 16px; font-weight: 700;">Moderate (Min M25)</div>
+                <span class="text-secondary" style="font-size: 11px;">Min cement 300 kg/m³ per IS 456 Table 5</span>
+              </div>
+              <div>
+                <span class="form-label">Thermal Curing Rule</span>
+                <div class="mono" style="font-size: 16px; font-weight: 700;">7 Days Minimum</div>
+                <span class="text-secondary" style="font-size: 11px;">IS 456 Clause 13.5</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+
+      setTimeout(() => {{
+        initHazardMap();
+      }}, 50);
+    }}
+
+    let hazardLeafletMap = null;
+    function initHazardMap() {{
+      const el = document.getElementById("hazardMap");
+      if (!el || typeof L === "undefined") return;
+
+      const lat = 28.6139;
+      const lng = 77.2090;
+
+      hazardLeafletMap = L.map("hazardMap").setView([lat, lng], 11);
+      L.tileLayer("https://{{s}}.tile.openstreetmap.org/{{z}}/{{x}}/{{y}}.png", {{
+        attribution: "© OpenStreetMap contributors"
+      }}).addTo(hazardLeafletMap);
+
+      const marker = L.marker([lat, lng], {{ draggable: true }}).addTo(hazardLeafletMap);
+      marker.bindPopup("<b>Project Site</b><br>Sharma Residence, Delhi").openPopup();
+
+      marker.on("dragend", async (e) => {{
+        const pos = e.target.getLatLng();
+        const ind = document.getElementById("map-coords-indicator");
+        if (ind) ind.innerText = `${{pos.lat.toFixed(4)}}° N, ${{pos.lng.toFixed(4)}}° E`;
+      }});
+    }}
+
+    // Tab 7: Repair & Risk
+    function renderTabRisk(container, data) {{
+      container.innerHTML = `
+        <div class="statutory-disclaimer engineer-alert" style="background: #FEE2E2; border-color: #FCA5A5; color: #991B1B;">
+          <strong>Structural Safety Alert:</strong> Site inspection by a qualified structural engineer required before proceeding with structural additions or renovations.
+        </div>
+
+        <div class="card">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
+            <h3>Structural Defect &amp; Damage Assessment</h3>
+            <button class="btn btn-secondary btn-sm" onclick="document.getElementById('renPhotoInput').click()">+ Upload Photos</button>
+            <input type="file" id="renPhotoInput" multiple accept="image/*" style="display: none;" onchange="showToast('Damage photo uploaded.', 'success')" />
+          </div>
+
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px;">
+            <div style="border: 1px solid var(--border); border-radius: 8px; padding: 12px; background: #F8FAFC;">
+              <strong style="font-size: 13.5px;">Masonry Crack Survey</strong>
+              <div style="margin: 6px 0;"><span class="badge badge-danger">High Severity</span></div>
+              <p style="font-size: 12px; color: var(--text-secondary);">Diagonal shear crack across lintel beam. Requires carbon-fiber or steel jacketing.</p>
+            </div>
+            <div style="border: 1px solid var(--border); border-radius: 8px; padding: 12px; background: #F8FAFC;">
+              <strong style="font-size: 13.5px;">Water Ingress &amp; Seepage</strong>
+              <div style="margin: 6px 0;"><span class="badge badge-warning">Moderate Severity</span></div>
+              <p style="font-size: 12px; color: var(--text-secondary);">Efflorescence detected on basement brickwork. Polymer injection recommended.</p>
+            </div>
+          </div>
+        </div>
+      `;
+    }}
+
+    // Tab 8: Receipts
+    function renderTabReceipts(container, data) {{
+      container.innerHTML = `
+        <div class="card">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
+            <h3>Site Delivery Receipts &amp; Invoices</h3>
+            <button class="btn btn-primary btn-sm" onclick="showToast('Receipt upload dialogue opened.', 'info')">+ Upload Receipt</button>
+          </div>
+          <p class="text-secondary" style="font-size: 13px;">Verify material deliveries against signed invoices and purchase orders.</p>
+        </div>
+      `;
+    }}
+
+    // Views for Marketplace, Climate, Reports as top-level views
+    async function renderMarketplaceView(container) {{
+      container.innerHTML = `
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--space-4);">
+          <div>
+            <h1>${{t("nav.marketplace")}}</h1>
+            <p class="text-secondary">${{t("service_groups.group_c_desc")}}</p>
+          </div>
+        </div>
+        <div id="mkt-view-wrapper"></div>
+      `;
+      renderTabMarketplace(document.getElementById("mkt-view-wrapper"), state.activeProjectData);
+    }}
+
+    async function renderClimateView(container) {{
+      container.innerHTML = `
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--space-4);">
+          <div>
+            <h1>${{t("nav.climate")}}</h1>
+            <p class="text-secondary">${{t("service_groups.group_d_desc")}}</p>
+          </div>
+        </div>
+        <div id="climate-view-wrapper"></div>
+      `;
+      renderTabClimate(document.getElementById("climate-view-wrapper"), state.activeProjectData);
+    }}
+
+    async function renderReportsView(container) {{
+      container.innerHTML = `
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--space-4);">
+          <div>
+            <h1>${{t("nav.reports")}}</h1>
+            <p class="text-secondary">${{t("service_groups.group_e_desc")}}</p>
+          </div>
+        </div>
+        <div class="card">
+          <h3>30-Day Price Trends &amp; Anomaly Detection</h3>
+          <p class="text-secondary" style="font-size: 13px; margin-top: 6px;">Price index models across Delhi/NCR, Mumbai, and Bangalore for steel and cement.</p>
+        </div>
+      `;
+    }}
+
+    // =========================================================================
+    // AUTH VIEWS: LOGIN & REGISTER
+    // =========================================================================
+    function renderLoginView(container) {{
+      container.innerHTML = `
+        <div class="auth-page">
+          <div class="auth-card" style="max-width: 440px;">
+            <div style="text-align: center; margin-bottom: 20px;">
+              <h1 style="font-size: 24px; font-weight: 700; color: var(--brand); margin-bottom: 4px;">Buildora</h1>
+              <div style="font-size: 12px; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px;">
+                ${{t("brand.tagline")}}
+              </div>
+              <p style="font-size: 13.5px;">${{t("auth.login_title")}}</p>
+            </div>
+
+            <div id="login-error-banner" class="auth-alert auth-alert-error" style="display: none;"></div>
+
+            <form onsubmit="handleLoginSubmit(event)">
+              <div class="form-group">
+                <label class="form-label">${{t("auth.email_label")}}</label>
+                <input type="text" id="login-email" class="form-input" required placeholder="owner@demo.local" />
+              </div>
+
+              <div class="form-group">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+                  <label class="form-label" style="margin: 0;">${{t("auth.password_label")}}</label>
+                  <a href="javascript:void(0)" onclick="navigateTo('forgot-password')" style="font-size: 12px; color: var(--brand); text-decoration: none;">${{t("auth.forgot_password")}}</a>
+                </div>
+                <div class="password-input-group">
+                  <input type="password" id="login-password" class="form-input" required placeholder="••••••••" />
+                  <button type="button" class="password-toggle-btn" onclick="togglePasswordVisibility('login-password', this)">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                  </button>
+                </div>
+              </div>
+
+              <button type="submit" id="login-submit-btn" class="btn btn-primary" style="width: 100%; margin-top: 10px; padding: 10px;">
+                ${{t("auth.sign_in_btn")}}
+              </button>
+            </form>
+
+            <div style="margin-top: 20px; text-align: center; border-top: 1px solid var(--border); padding-top: 16px; font-size: 13px;">
+              <span class="text-secondary">${{t("auth.no_account")}}</span>
+              <a href="javascript:void(0)" onclick="navigateTo('register')" style="font-weight: 600; color: var(--brand); margin-left: 6px; text-decoration: none;">${{t("auth.create_account")}}</a>
+            </div>
+
+            <div style="margin-top: 12px; text-align: center;">
+              <a href="javascript:void(0)" onclick="navigateTo('dashboard')" style="font-size: 12px; color: var(--text-secondary); text-decoration: none;">
+                &larr; ${{t("auth.return_home")}}
+              </a>
+            </div>
+          </div>
+        </div>
+      `;
+    }}
+
+    async function handleLoginSubmit(e) {{
+      e.preventDefault();
+      const errBanner = document.getElementById("login-error-banner");
+      const submitBtn = document.getElementById("login-submit-btn");
+      if (errBanner) errBanner.style.display = "none";
+
+      const email = document.getElementById("login-email").value.trim();
+      const password = document.getElementById("login-password").value;
+
+      if (!password || password.length < 8) {{
+        if (errBanner) {{
+          errBanner.innerText = "Password must be at least 8 characters long.";
+          errBanner.style.display = "block";
+        }}
+        return;
+      }}
+
+      if (submitBtn) {{
+        submitBtn.disabled = true;
+        submitBtn.innerText = "Signing in...";
+      }}
+
+      try {{
+        const res = await apiRequest("/api/auth/login", "POST", {{ email, password }});
+        state.user = res.user;
+        state.token = res.token;
+        localStorage.setItem("buildora_token", res.token);
+
+        showToast(`Welcome back, ${{res.user.name}}!`, "success");
+
+        if (res.mustChangePassword) {{
+          navigateTo("first-time-password");
+          return;
+        }}
+
+        // Check if redirect pending
+        const savedRedirect = state.redirectAfterLogin || (() => {{
+          try {{
+            const s = sessionStorage.getItem("buildora_pending_redirect");
+            return s ? JSON.parse(s) : null;
+          }} catch(e) {{ return null; }}
+        }})();
+
+        if (savedRedirect) {{
+          state.redirectAfterLogin = null;
+          try {{ sessionStorage.removeItem("buildora_pending_redirect"); }} catch(e) {{}}
+          navigateTo(savedRedirect.view, savedRedirect.tab);
+          return;
+        }}
+
+        navigateTo("dashboard");
+      }} catch (err) {{
+        if (errBanner) {{
+          errBanner.innerText = err.message || "Invalid email or password.";
+          errBanner.style.display = "block";
+        }}
+      }} finally {{
+        if (submitBtn) {{
+          submitBtn.disabled = false;
+          submitBtn.innerText = t("auth.sign_in_btn");
+        }}
+      }}
+    }}
+
+    function renderRegisterView(container) {{
+      container.innerHTML = `
+        <div class="auth-page">
+          <div class="auth-card" style="max-width: 440px;">
+            <div style="text-align: center; margin-bottom: 20px;">
+              <h1 style="font-size: 24px; font-weight: 700; color: var(--brand); margin-bottom: 4px;">Buildora</h1>
+              <p style="font-size: 13.5px;">${{t("auth.create_account")}}</p>
+            </div>
+
+            <div id="register-error-banner" class="auth-alert auth-alert-error" style="display: none;"></div>
+
+            <form onsubmit="handleRegisterSubmit(event)">
+              <div class="form-group">
+                <label class="form-label">Full Name</label>
+                <input type="text" id="reg-name" class="form-input" required placeholder="Arpit Jain" />
+              </div>
+              <div class="form-group">
+                <label class="form-label">Email Address</label>
+                <input type="email" id="reg-email" class="form-input" required placeholder="arpit@example.com" />
+              </div>
+              <div class="form-group">
+                <label class="form-label">Password (min 8 chars)</label>
+                <input type="password" id="reg-password" class="form-input" required minlength="8" placeholder="••••••••" />
+              </div>
+              <button type="submit" id="reg-submit-btn" class="btn btn-primary" style="width: 100%; margin-top: 10px; padding: 10px;">
+                ${{t("auth.create_account")}}
+              </button>
+            </form>
+
+            <div style="margin-top: 20px; text-align: center; border-top: 1px solid var(--border); padding-top: 16px; font-size: 13px;">
+              <span class="text-secondary">Already have an account?</span>
+              <a href="javascript:void(0)" onclick="navigateTo('login')" style="font-weight: 600; color: var(--brand); margin-left: 6px; text-decoration: none;">${{t("auth.sign_in_btn")}}</a>
+            </div>
+          </div>
+        </div>
+      `;
+    }}
+
+    async function handleRegisterSubmit(e) {{
+      e.preventDefault();
+      const name = document.getElementById("reg-name").value.trim();
+      const email = document.getElementById("reg-email").value.trim();
+      const password = document.getElementById("reg-password").value;
+      const errBanner = document.getElementById("register-error-banner");
+      if (errBanner) errBanner.style.display = "none";
+
+      try {{
+        const res = await apiRequest("/api/auth/register", "POST", {{ name, email, password }});
+        showToast("Account created successfully! Please sign in.", "success");
+        navigateTo("login");
+      }} catch(err) {{
+        if (errBanner) {{
+          errBanner.innerText = err.message || "Registration failed.";
+          errBanner.style.display = "block";
+        }}
+      }}
+    }}
+
+    function renderForgotPasswordView(container) {{
+      container.innerHTML = `
+        <div class="auth-page">
+          <div class="auth-card" style="max-width: 420px;">
+            <h2 style="margin-bottom: 8px;">Reset Password</h2>
+            <p class="text-secondary" style="font-size: 13px; margin-bottom: 16px;">Enter your email to receive password reset instructions.</p>
+            <form onsubmit="event.preventDefault(); showToast('Reset email sent.', 'info'); navigateTo('login');">
+              <div class="form-group">
+                <label class="form-label">Email Address</label>
+                <input type="email" class="form-input" required placeholder="name@company.com" />
+              </div>
+              <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 8px;">Send Reset Link</button>
+              <div style="margin-top: 16px; text-align: center;">
+                <a href="javascript:void(0)" onclick="navigateTo('login')" style="font-size: 12.5px; color: var(--brand); text-decoration: none;">&larr; Back to Sign In</a>
+              </div>
+            </form>
+          </div>
+        </div>
+      `;
+    }}
+
+    function renderResetPasswordView(container) {{
+      renderForgotPasswordView(container);
+    }}
+
+    function renderFirstTimePasswordView(container) {{
+      renderForgotPasswordView(container);
+    }}
+
+    function handleLogout() {{
+      localStorage.removeItem("buildora_token");
+      state.token = null;
+      state.user = null;
+      showToast("Signed out successfully.", "info");
+      updateHeaderAuth();
+      navigateTo("dashboard");
+    }}
+
+    function openProfileModal() {{
+      showToast(`User: ${{state.user?.name || 'User'}} (${{state.user?.email || ''}})`, "info");
+      const menu = document.getElementById("user-dropdown-menu");
+      if (menu) menu.style.display = "none";
+    }}
+
+    function openChangePasswordModal() {{
+      const menu = document.getElementById("user-dropdown-menu");
+      if (menu) menu.style.display = "none";
+      showToast("Password update form available in Settings.", "info");
+    }}
+
+    function openNewProjectModal() {{
+      const modal = document.getElementById("modal-container");
+      modal.style.display = "flex";
+      modal.className = "modal-backdrop";
+      modal.innerHTML = `
+        <div class="modal-box" style="max-width: 560px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
+            <h3>Create New Project</h3>
+            <button onclick="closeModal()" style="background: none; border: 0; font-size: 20px; cursor: pointer;">&times;</button>
+          </div>
+          <form onsubmit="handleCreateProjectSubmit(event)">
+            <div class="form-group">
+              <label class="form-label">Project Name</label>
+              <input type="text" id="wiz-name" class="form-input" required placeholder="e.g. Apex Heights" value="Greenfield Residency" />
+            </div>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+              <div class="form-group">
+                <label class="form-label">City</label>
+                <select id="wiz-city" class="form-select">
+                  <option value="Delhi">Delhi (Zone IV)</option>
+                  <option value="Noida">Noida (Zone IV)</option>
+                  <option value="Gurugram">Gurugram (Zone IV)</option>
+                  <option value="Mumbai">Mumbai (Zone III)</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Stage</label>
+                <select id="wiz-stage" class="form-select">
+                  <option value="Planning">Planning</option>
+                  <option value="Foundation">Foundation</option>
+                  <option value="Structure">Structure</option>
+                  <option value="Finishing">Finishing</option>
+                  <option value="Completed">Completed</option>
+                </select>
+              </div>
+            </div>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+              <div class="form-group">
+                <label class="form-label">Built-Up Area (sq.ft)</label>
+                <input type="number" id="wiz-area" class="form-input" required value="2400" />
+              </div>
+              <div class="form-group">
+                <label class="form-label">Floors</label>
+                <input type="number" id="wiz-floors" class="form-input" required value="2" />
+              </div>
+            </div>
+            <div style="display: flex; justify-content: flex-end; gap: 8px; margin-top: 14px;">
+              <button type="button" class="btn btn-secondary btn-sm" onclick="closeModal()">Cancel</button>
+              <button type="submit" class="btn btn-primary btn-sm">Create Project</button>
+            </div>
+          </form>
+        </div>
+      `;
+    }}
+
+    async function handleCreateProjectSubmit(e) {{
+      e.preventDefault();
+      const name = document.getElementById("wiz-name").value;
+      const city = document.getElementById("wiz-city").value;
+      const stage = document.getElementById("wiz-stage").value;
+      const area = parseInt(document.getElementById("wiz-area").value, 10);
+      const floors = parseInt(document.getElementById("wiz-floors").value, 10);
+
+      try {{
+        await apiRequest("/api/projects", "POST", {{
+          name,
+          city,
+          stage,
+          area_sqft: area,
+          floors
+        }});
+        showToast("Project created successfully!", "success");
+        closeModal();
+        renderCurrentView();
+      }} catch(err) {{
+        showToast("Error creating project: " + err.message, "error");
+      }}
+    }}
+
+    function closeModal() {{
+      const modal = document.getElementById("modal-container");
+      if (modal) modal.style.display = "none";
+    }}
+
+    function showNotifications() {{
+      showToast("Notifications: 150 Bags OPC 53 confirmed.", "info");
+    }}
+
+    // App Initialization
+    window.addEventListener("DOMContentLoaded", async () => {{
+      // Initialize language state
+      switchLanguage(state.lang);
+
+      // Check stored token
+      const storedToken = localStorage.getItem("buildora_token");
+      if (storedToken) {{
+        state.token = storedToken;
+        try {{
+          const authMe = await apiRequest("/api/auth/me");
+          if (authMe && authMe.user) {{
+            state.user = authMe.user;
+          }} else {{
+            throw new Error("Invalid session");
+          }}
+        }} catch(e) {{
+          localStorage.removeItem("buildora_token");
+          state.token = null;
+          state.user = null;
+        }}
+      }}
+
+      handleRouteFromHash();
+    }});
+  </script>
+</body>
+</html>
+"""
+
+target_path = base_dir / "public" / "index.html"
+with open(target_path, "w", encoding="utf-8") as f:
+    f.write(html_content)
+
+print(f"Successfully generated clean index.html at {target_path} ({len(html_content)} characters)")

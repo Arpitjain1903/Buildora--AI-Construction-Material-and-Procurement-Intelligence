@@ -578,9 +578,9 @@ def parse_project_description_text(user_text: str) -> Dict[str, Any]:
         confirmation_reasons.append("Project area was not detected; please specify area in sqft.")
         area_val = 1500.0
     elif area_val < 100.0:
-        confirmation_reasons.append(f"Detected area ({area_val} sqft) is below minimum residential threshold of 100 sqft.")
+        confirmation_reasons.append(f"Please confirm: Detected area_sqft ({area_val} sqft) is out of bounds (below minimum residential threshold of 100 sqft).")
     elif area_val > 100000.0:
-        confirmation_reasons.append(f"Detected area ({area_val} sqft) exceeds residential threshold of 100,000 sqft.")
+        confirmation_reasons.append(f"Please confirm: Detected area_sqft ({area_val} sqft) is out of bounds (exceeds residential threshold of 100,000 sqft).")
 
     # Check floors: 1 to 10
     if floors_val is None:

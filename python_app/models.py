@@ -41,12 +41,37 @@ class User(Base):
     organization_id = Column(String(64), ForeignKey("organizations.id"), nullable=False)
     name = Column(String(255), nullable=False)
     email = Column(String(255), unique=True, index=True, nullable=False)
+    phone = Column(String(32), nullable=True)
     role = Column(String(64), nullable=False, default="site_user") # 'contractor_owner', 'site_user'
     password_hash = Column(String(255), nullable=False)
+    must_change_password = Column(Boolean, default=False, nullable=False)
+    reset_token_hash = Column(String(255), nullable=True)
+    reset_token_expiry = Column(DateTime, nullable=True)
+    roles = Column(JSON, default=list) # e.g. ["contractor_owner", "site_user"]
     created_at = Column(DateTime, default=utc_now)
 
     organization = relationship("Organization", back_populates="users")
     sessions = relationship("Session", back_populates="user", cascade="all, delete-orphan")
+    user_roles = relationship("UserRole", back_populates="user", cascade="all, delete-orphan")
+
+    def get_allowed_roles(self) -> list:
+        assigned = [ur.role for ur in self.user_roles] if self.user_roles else []
+        if isinstance(self.roles, list) and self.roles:
+            for r in self.roles:
+                if r not in assigned:
+                    assigned.append(r)
+        if self.role and self.role not in assigned:
+            assigned.append(self.role)
+        return assigned
+
+class UserRole(Base):
+    __tablename__ = "user_roles"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    user_id = Column(String(64), ForeignKey("users.id"), nullable=False)
+    role = Column(String(64), nullable=False)
+
+    user = relationship("User", back_populates="user_roles")
 
 class Session(Base):
     __tablename__ = "sessions"

@@ -8,11 +8,12 @@ import json
 from pathlib import Path
 from datetime import datetime
 
+from sqlalchemy import inspect, text
 from python_app.database import engine, SessionLocal, Base
 from python_app.models import (
     Organization, User, Project, ProjectMember, BoqItem, Material,
     Supplier, SupplierQuote, Stock, OpenOrder, Receipt, Approval,
-    AuditLog, MarketplaceListing, ClimateZone
+    AuditLog, MarketplaceListing, ClimateZone, UserRole
 )
 from python_app.auth import hash_password
 from python_app.climate_engine import REGIONAL_CLIMATE_DATABASE
@@ -21,6 +22,26 @@ ROOT_DIR = Path(__file__).resolve().parent.parent
 STORE_JSON = ROOT_DIR / "data" / "store.json"
 
 def init_and_migrate_db():
+    # 0. Migrate schema for users table if columns are missing
+    try:
+        inspector = inspect(engine)
+        if inspector.has_table("users"):
+            user_cols = [c["name"] for c in inspector.get_columns("users")]
+            with engine.connect() as conn:
+                if "must_change_password" not in user_cols:
+                    conn.execute(text("ALTER TABLE users ADD COLUMN must_change_password BOOLEAN DEFAULT 0 NOT NULL"))
+                if "reset_token_hash" not in user_cols:
+                    conn.execute(text("ALTER TABLE users ADD COLUMN reset_token_hash VARCHAR(255)"))
+                if "reset_token_expiry" not in user_cols:
+                    conn.execute(text("ALTER TABLE users ADD COLUMN reset_token_expiry DATETIME"))
+                if "roles" not in user_cols:
+                    conn.execute(text("ALTER TABLE users ADD COLUMN roles JSON"))
+                if "phone" not in user_cols:
+                    conn.execute(text("ALTER TABLE users ADD COLUMN phone VARCHAR(32)"))
+                conn.commit()
+    except Exception as e:
+        print(f"[DB MIGRATION NOTICE] Table schema inspect/alter note: {e}")
+
     Base.metadata.create_all(bind=engine)
     db = SessionLocal()
     try:
@@ -31,7 +52,7 @@ def init_and_migrate_db():
             db.add(org)
             db.commit()
 
-        # 2. Seed Users
+        # 2. Seed Users with Bcrypt Hashed Passwords
         owner = db.query(User).filter(User.email == "owner@demo.local").first()
         if not owner:
             owner = User(
@@ -40,9 +61,20 @@ def init_and_migrate_db():
                 name="Contractor Owner",
                 email="owner@demo.local",
                 role="contractor_owner",
-                password_hash=hash_password("owner123", "demo-owner-salt")
+                roles=["contractor_owner"],
+                password_hash=hash_password("owner123"),
+                must_change_password=False
             )
             db.add(owner)
+            db.flush()
+        else:
+            owner.password_hash = hash_password("owner123")
+            owner.roles = ["contractor_owner"]
+            owner.must_change_password = False
+
+        # Ensure user_roles for owner
+        db.query(UserRole).filter(UserRole.user_id == owner.id).delete()
+        db.add(UserRole(user_id=owner.id, role="contractor_owner"))
 
         site_user = db.query(User).filter(User.email == "site@demo.local").first()
         if not site_user:
@@ -52,9 +84,25 @@ def init_and_migrate_db():
                 name="Site Engineer",
                 email="site@demo.local",
                 role="site_user",
-                password_hash=hash_password("site123", "demo-site-salt")
+                roles=["site_user"],
+                password_hash=hash_password("site123"),
+                must_change_password=False
             )
             db.add(site_user)
+            db.flush()
+        else:
+            site_user.password_hash = hash_password("site123")
+            site_user.roles = ["site_user"]
+            site_user.must_change_password = False
+
+        # Ensure user_roles for site_user
+        db.query(UserRole).filter(UserRole.user_id == site_user.id).delete()
+        db.add(UserRole(user_id=site_user.id, role="site_user"))
+
+        # Clean any extra demo users
+        db.query(UserRole).filter(UserRole.user_id == "user_new_001").delete()
+        db.query(User).filter(User.email == "newuser@demo.local").delete()
+
         db.commit()
 
         # 3. Seed Climate Zones
